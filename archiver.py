@@ -9,6 +9,7 @@
 
 import matplotlib.pyplot as plt
 import time
+import os
 
 # The above class, MyClass, is used to store and manipulate lists of rewards, epsilon values, step
 # counts, and fruit counters, and provides methods to calculate averages and save a figure of the
@@ -20,6 +21,14 @@ class Archiver():
         The above function is the initialization method for a class and it initializes several instance
         variables.
         """
+        
+        # The code `if not os.path.isdir('plots'): os.makedirs('plots')` is checking if a directory named
+        # "plots" exists in the current working directory. If the directory does not exist, it creates a new
+        # directory named "plots". This is done to ensure that the directory exists before saving any plots to
+        # it.
+        if not os.path.isdir('plots'):
+            os.makedirs('plots')
+
         self.ep_rewards = []
         self.ep_rewards_norm = []
         self.epsilon_over_time = []
