@@ -87,7 +87,7 @@ class DQNAgent:
         self.target_model.set_weights(self.model.get_weights())
 
         # An array with last n steps for training
-        self.replay_memory = deque(maxlen=self.MIN_REPLAY_MEMORY_SIZE)
+        self.replay_memory = deque(maxlen=self.REPLAY_MEMORY_SIZE)
 
         # Used to count when to update target network with main network's weights
         self.target_update_counter = 0

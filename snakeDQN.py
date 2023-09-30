@@ -10,7 +10,6 @@
                                                                       
 # library imports
 import numpy as np
-import matplotlib.pyplot as plt
 from tqdm import tqdm
 import colored_traceback
 colored_traceback.add_hook()
