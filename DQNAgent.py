@@ -186,7 +186,7 @@ class DQNAgent:
 
         # Fit on all samples as one batch, log only on terminal state
         self.model.fit(np.array(X)/255, np.array(y), batch_size=self.MINIBATCH_SIZE, verbose=self.VERBOSE, shuffle=False)
-
+        
         # Update target network counter every episode
         if terminal_state:
             self.target_update_counter += 1
@@ -206,6 +206,5 @@ class DQNAgent:
         environment or game
         :return: the predicted output of the model for the given state.
         """
-        state + np.array(state)
-        state = np.array(state).reshape(-1, *(27,27,1))/255
+        state = np.array(state).reshape(-1, *self.SHAPE)/255
         return self.model.predict(state)[0]
