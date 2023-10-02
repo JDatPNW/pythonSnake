@@ -49,7 +49,7 @@ The project consists of the following key components:
 1. Clone this repository to your local machine:
 
    ```shell
-   git clone https://github.com/yourusername/snake-dqn.git
+     git clone https://github.com/JDatPNW/pythonSnake
    cd snake-dqn
    ```
 2. Ensure you have the required Python libraries installed. You can install them using pip:
