@@ -48,18 +48,18 @@ The project consists of the following key components:
 
 1. Clone this repository to your local machine:
 
-   ```shell
-     git clone https://github.com/JDatPNW/pythonSnake
-   cd snake-dqn
-   ```
+  ```shell
+  git clone https://github.com/JDatPNW/pythonSnake
+  cd snake-dqn
+  ```
 2. Ensure you have the required Python libraries installed. You can install them using pip:
 
   ```shell
-    pip install numpy tensorflow tqdm colorama matplotlib psutil
+  pip install numpy tensorflow tqdm colorama matplotlib psutil
   ```
 3. Start the Snake game with the DQN agent by running the following command:
   ```shell
-    python snakeDQN.py
+  python snakeDQN.py
   ```
 4. Follow the console log to observe the training process and agent's performance.
 
