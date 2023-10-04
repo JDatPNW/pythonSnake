@@ -186,7 +186,7 @@ class DQNAgent:
 
         # Fit on all samples as one batch, log only on terminal state
         self.model.fit(np.array(X)/255, np.array(y), batch_size=self.MINIBATCH_SIZE, verbose=self.VERBOSE, shuffle=False)
-        
+
         # Update target network counter every episode
         if terminal_state:
             self.target_update_counter += 1
@@ -196,6 +196,8 @@ class DQNAgent:
             self.target_model.set_weights(self.model.get_weights())
             self.target_update_counter = 0
 
+        del minibatch, current_qs, current_state, current_qs_list, new_current_states, future_qs_list, X, y
+        
     # Queries main network for Q values given current observation space (environment state)
     def get_qs(self, state):
         """

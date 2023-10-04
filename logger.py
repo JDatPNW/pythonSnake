@@ -19,7 +19,7 @@ class Logger():
         """
         pass
 
-    def log(self, episode, step, reward, reward_overall, action, direction, head, dead, epsilon, ran_into_self, cause):
+    def log(self, episode, step, reward, reward_overall, action, direction, head, dead, epsilon, ran_into_self, cause, eaten):
         """
         The `log` function prints a formatted log message with various information about the episode, step,
         rewards, actions, and other details.
@@ -46,15 +46,15 @@ class Logger():
         itself, or reaching a maximum number of steps
         """
         print("\n\n")
-        print("-------------------------------------------------------------------------------------------------------------------------------------------------------------")
+        print("-----------------------------------------------------------------------------------------------------------------------------------------------------------------------")
         print(Fore.RED)
-        print ('| {:<5} | {:<5} | {:<13} | {:<12} | {:<10} | {:<7} | {:<10} | {:<10} | {:<5} | {:<12} | {:<12} | {:<15} |'.format('EP','Step', 'Epsilon', 'Step Reward', 'Ep Reward', 'Action', 'Dir', 'Head', 'Dead', 'Cause', 'Into Self', 'RAM'))
+        print ('| {:<5} | {:<5} | {:<13} | {:<12} | {:<10} | {:<15} | {:<7} | {:<10} | {:<10} | {:<5} | {:<12} | {:<12} | {:<15} |'.format('EP','Step', 'Epsilon', 'Step Reward', 'Fruits Eaten', 'Ep Reward', 'Action', 'Dir', 'Head', 'Dead', 'Cause', 'Into Self', 'RAM'))
         print(Style.RESET_ALL)
-        print("-------------------------------------------------------------------------------------------------------------------------------------------------------------")
+        print("-----------------------------------------------------------------------------------------------------------------------------------------------------------------------")
         print(Fore.YELLOW)
-        print ('| {:<5} | {:<5} | {:<13} | {:<12} | {:<10} | {:<7} | {:<10} | {:<10} | {:<5} | {:<12} | {:<12} | {:<15} |'.format(episode, step, round(epsilon, 10), reward, round(reward_overall, 1), action, str(direction), str(head), dead, cause, ran_into_self, (str(psutil.virtual_memory().used // 1e6) + "MB")))
+        print ('| {:<5} | {:<5} | {:<13} | {:<12} | {:<10} | {:<15} | {:<7} | {:<10} | {:<10} | {:<5} | {:<12} | {:<12} | {:<15} |'.format(episode, step, round(epsilon, 10), reward, eaten, round(reward_overall, 1), action, str(direction), str(head), dead, cause, ran_into_self, (str(psutil.virtual_memory().used // 1e6) + "MB")))
         print(Style.RESET_ALL)
-        print("-------------------------------------------------------------------------------------------------------------------------------------------------------------")
+        print("-----------------------------------------------------------------------------------------------------------------------------------------------------------------------")
         print("\n\n")
         print(Fore.GREEN)
         print("""

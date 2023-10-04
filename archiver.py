@@ -10,18 +10,19 @@
 import matplotlib.pyplot as plt
 import time
 import os
+import numpy as np
 
 # The above class, MyClass, is used to store and manipulate lists of rewards, epsilon values, step
 # counts, and fruit counters, and provides methods to calculate averages and save a figure of the
 # data.
 class Archiver():
     
-    def __init__(self, every, name):
+    def __init__(self, every, name, num_experiments):
         """
         The above function is the initialization method for a class and it initializes several instance
         variables.
         """
-        
+
         # The code `if not os.path.isdir('plots'): os.makedirs('plots')` is checking if a directory named
         # "plots" exists in the current working directory. If the directory does not exist, it creates a new
         # directory named "plots". This is done to ensure that the directory exists before saving any plots to
@@ -41,8 +42,9 @@ class Archiver():
         self.average_fruit_list = []
         self.min_reward_list = []
         self.max_reward_list = []
+        self.num_experiments = num_experiments
 
-    def appendLists(self, episode_reward, epsilon, step_count, fruit_counter,):
+    def appendLists(self, episode_reward, epsilon, step_count, fruit_counter):
         """
         The function appends various values to different lists.
         
@@ -77,6 +79,7 @@ class Archiver():
         self.average_fruit_list.append(average_fruits)
         self.min_reward_list.append(min_reward)
         self.max_reward_list.append(max_reward)
+        del average_reward, average_step, average_fruits, min_reward, max_reward
         
         
     def saveFig(self):
@@ -98,17 +101,16 @@ class Archiver():
 
         ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
 
-        color = 'tab:red'
         ax2.set_ylabel('Fruits Eaten')  # we already handled the x-label with ax1
         ax2.plot(self.average_fruit_list, label = "Average Fruits eaten", color="#976FE8")
         ax2.tick_params(axis='y')
         plt.ylim([0, 10])
         fig.tight_layout()  # otherwise the right y-label is slightly clipped
-        plt.xlim([0, 1000])
+        plt.xlim([0, self.num_experiments])
+        # plt.xticks(np.arange(0, self.num_experiments/100, self.AGGREGATE_STATS_EVERY))
 
-
-
-        
         plt.legend(loc="upper right")
         plt.savefig("./plots/" + self.NAME + '-avg-wall-' + str(len(self.average_reward_list)) + '-' + str(time.time()) + ".png")
         plt.clf()
+
+        del fig, ax1, ax2

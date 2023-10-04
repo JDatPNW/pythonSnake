@@ -13,6 +13,9 @@ import numpy as np
 from tqdm import tqdm
 import colored_traceback
 colored_traceback.add_hook()
+import tensorflow as tf
+from memory_profiler import profile
+import gc
 
 # class imports
 import DQNAgent
@@ -39,19 +42,18 @@ LOG_EVERY_STEP = True # Log into console every step?
 TF_VERBOSE = True
 EXPERIMENT_NAME = "Snake"
 
-epsilon = 1 # Start Value for Epsilon
-EPSILON_DECAY = 0.9995 # Rate at which Epsilon decays
-MIN_EPSILON = 0.1 # Value where that decay stops
-
 # The code is creating instances of three different classes: `DQNAgent`, `snakeGame`,, `Archiver` and 'Logger'.
 agent = DQNAgent.DQNAgent(REPLAY_MEMORY_SIZE, MIN_REPLAY_MEMORY_SIZE, MINIBATCH_SIZE, UPDATE_TARGET_EVERY, 
                           DISCOUNT, WIDTH, HEIGHT, ACTION_SPACE_SIZE, TF_VERBOSE)
 game = snakeGame.snakeGame(WIDTH, HEIGHT, START_LENGTH, NUM_FRUIT, CAN_PORT)
-plot = archiver.Archiver(AGGREGATE_STATS_EVERY, EXPERIMENT_NAME)
+plot = archiver.Archiver(AGGREGATE_STATS_EVERY, EXPERIMENT_NAME, EPISODES)
 log = logger.Logger()
 
+epsilon = 1 # Start Value for Epsilon
+EPSILON_DECAY = 0.9995 # Rate at which Epsilon decays
+MIN_EPSILON = 0.1 # Value where that decay stops
 
-def main():
+def main(episode):
     """
     The main function is a loop that runs episodes of a game, where each episode consists of multiple
     steps.
@@ -86,6 +88,8 @@ def main():
         field = game.update_field()
 
         new_state = np.array(field) # jd^:
+        del field
+        
         done = dead
         if dead:
             reward = -50
@@ -111,21 +115,26 @@ def main():
         if(step_count >= 150):
             done = True
         
-        # Decay epsilon
-        if epsilon > MIN_EPSILON and episode > 31:
-            epsilon *= EPSILON_DECAY
-            epsilon = max(MIN_EPSILON, epsilon)
         
         if(LOG_EVERY_STEP):
-            log.log(episode, step_count, reward, episode_reward, action, (game.direction), (game.SNAKE[0]), dead, epsilon, run_into_self, cause)
+            log.log(episode, step_count, reward, episode_reward, action, (game.direction), (game.SNAKE[0]), dead, epsilon, run_into_self, cause, fruit_counter)
 
     # Append episode reward to a list and log stats (every given number of episodes)
     plot.appendLists(episode_reward, epsilon, step_count, fruit_counter)
     if not episode % AGGREGATE_STATS_EVERY:
         plot.averageLists()
         plot.saveFig()
-    log.log(episode, step_count, reward, episode_reward, action, (game.direction), (game.SNAKE[0]), dead, epsilon, run_into_self, cause)
+    log.log(episode, step_count, reward, episode_reward, action, (game.direction), (game.SNAKE[0]), dead, epsilon, run_into_self, cause, fruit_counter)
+           
+    # Decay epsilon
+    if epsilon > MIN_EPSILON and episode > 31:
+        epsilon *= EPSILON_DECAY
+        epsilon = max(MIN_EPSILON, epsilon)
+
+    del step_count, reward, episode_reward, action, dead, run_into_self, cause, current_state
 
 # Iterate over episodes
 for episode in tqdm(range(1, EPISODES + 1), ascii=True, unit='episodes'):
-    main()
+    main(episode)
+    tf.keras.backend.clear_session()
+    gc.collect()
