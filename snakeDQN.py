@@ -26,21 +26,21 @@ import logger
 # These are the parameters and settings used in the snake game and the DQN agent. Here is a brief
 # explanation of each parameter:
 ACTION_SPACE_SIZE = 5 # Number possible actions
-WIDTH = 25 # Width of playable field
-HEIGHT = 25 # Height of playable field
-START_LENGTH = 5 # Starting Length for snake
+WIDTH = 12 # Width of playable field
+HEIGHT = 12 # Height of playable field
+START_LENGTH = 1 # Starting Length for snake
 NUM_FRUIT = (WIDTH+HEIGHT)/2 # NUMBER OF APPLES SPAWNED
 CAN_PORT = True # Can the snake come back from the opposite site when hitting the wall?
-EPISODES = 10_000 # Number of episodes
+EPISODES = 50_000 # Number of episodes
 DISCOUNT = 0.99 # Discount factor / alpha
 REPLAY_MEMORY_SIZE = 50_000  # How many last steps to keep for model training
 MIN_REPLAY_MEMORY_SIZE = 1_000  # Minimum number of steps in a memory to start training
 MINIBATCH_SIZE = 64  # How many steps (samples) to use for training
 UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
-AGGREGATE_STATS_EVERY = 50  # episodes used for averaging for plotting
+AGGREGATE_STATS_EVERY = 100  # episodes used for averaging for plotting
 LOG_EVERY_STEP = True # Log into console every step?
 TF_VERBOSE = True
-EXPERIMENT_NAME = "Snake"
+EXPERIMENT_NAME = "Snake-post-changes"
 
 # The code is creating instances of three different classes: `DQNAgent`, `snakeGame`,, `Archiver` and 'Logger'.
 agent = DQNAgent.DQNAgent(REPLAY_MEMORY_SIZE, MIN_REPLAY_MEMORY_SIZE, MINIBATCH_SIZE, UPDATE_TARGET_EVERY, 
@@ -111,6 +111,8 @@ def main(episode):
         agent.train(done, step_count)
 
         current_state = new_state
+        del new_state
+        
         step_count += 1
         if(step_count >= 150):
             done = True
