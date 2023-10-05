@@ -63,9 +63,9 @@ class DQNAgent:
             os.makedirs('models')
         
         # For more repetitive results
-        random.seed(31)
-        np.random.seed(31)
-        tf.random.set_seed(31)
+        # random.seed(31)
+        # np.random.seed(31)
+        # tf.random.set_seed(31)
 
         # These variables are used to configure the parameters of the DQNAgent class. Here is a brief
         # explanation of each variable:
@@ -101,12 +101,10 @@ class DQNAgent:
         model = Sequential()
         model.add(Conv2D(16, (3, 3), input_shape=self.SHAPE))  # OBSERVATION_SPACE_VALUES = (10, 10, 3) a 10x10 RGB image.
         model.add(Activation('relu'))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
         model.add(Dropout(0.2))
 
         model.add(Conv2D(16, (3, 3)))
         model.add(Activation('relu'))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
         model.add(Dropout(0.2))
 
         model.add(Flatten())  # this converts our 3D feature maps to 1D feature vectors
