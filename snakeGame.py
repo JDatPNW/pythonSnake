@@ -8,9 +8,9 @@
                                           
 '''
 
-import time
 import random
 import numpy as np
+import random
 # import keyboard # if MANUAL
 
 # The snakeGame class represents a game of snake, with methods for initializing the game, updating the
@@ -35,6 +35,7 @@ class snakeGame():
         self.HEIGHT = height
 
         self.LENGTH = length
+        self.startingLENGTH = length
         self.SNAKE = [[int(self.HEIGHT/2), int(self.WIDTH/2)]] # TODO: check if they are in the right order or not
         self.direction = [1,0]  # [-N/+S , E+/-W]
 
@@ -47,9 +48,26 @@ class snakeGame():
         of the snake, creating a field with boundaries, and randomly placing food on the field.
         :return: The function `initGame` returns the `self.field` variable.
         """
-        self.direction = [1,0]  # [-N/+S , E+/-W]
-        self.LENGTH = 5
-        self.SNAKE = [[int(self.HEIGHT/2), int(self.WIDTH/2)]] # TODO: check if they are in the right order or not
+        
+        # Fixed starting Direction
+        # self.direction = [1,0]  # [-N/+S , E+/-W] <- use this one if want no randomness
+        
+        # Random starting Direction
+        self.direction = []
+        start_dir = random.randint(0,3)
+        if(start_dir==(0)):
+            self.direction = [-1,0]
+        elif(start_dir==(1)):
+            self.direction = [1,0]
+        elif(start_dir==(2)):
+            self.direction = [0,1]
+        elif(start_dir==(3)):
+            self.direction = [0,-1]
+
+        self.LENGTH = self.startingLENGTH
+        # If fixed starting point
+        # self.SNAKE = [[int(self.HEIGHT/2), int(self.WIDTH/2)]] # TODO: check if they are in the right order or not <- use this if no random starting
+        self.SNAKE = [[random.randint(0+3, self.HEIGHT-3), random.randint(0+3, self.WIDTH-3)]]
 
         row = list([0] * (self.WIDTH+2))
         self.field = []
@@ -63,6 +81,7 @@ class snakeGame():
             if(self.field[x][y]== 0):
                 self.field[x][y] = 7
                 counter += 1
+        del row, _, start_dir, counter, x, y
         return self.field
 
     def update_field(self):
@@ -94,8 +113,7 @@ class snakeGame():
         head[0] += self.direction[0]
         head[1] += self.direction[1]
 
-        # If keyboard control
-
+        # If wrapping teleopring
         # if(head[0] == 0):
         #     head[0] = height
         # if(head[0] == height+1):
@@ -105,6 +123,7 @@ class snakeGame():
         # if(head[1] == width+1):
         #     head[1] = 1
 
+        # if wall = dead
         if(head[0] == 0):
             dead = True
             cause = "Into Wall"
@@ -125,7 +144,7 @@ class snakeGame():
 
         if(len(self.SNAKE) > self.LENGTH):
             self.SNAKE.pop()
-
+        del head
         return dead, cause
 
     def eat(self):
@@ -147,7 +166,6 @@ class snakeGame():
                     counter += 1
         else:
             reward = 0
-
         return self.field, reward
 
     def control(self, action):
@@ -187,7 +205,7 @@ class snakeGame():
                 self.direction = [-1,0]
                 run_into_self = True
             else:
-                direction = [1,0]
+                self.direction = [1,0]
         elif(action==(2)):
             if self.direction == [0,-1]:
                 self.direction = [0,-1]
