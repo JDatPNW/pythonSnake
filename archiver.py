@@ -106,8 +106,6 @@ class Archiver():
         ax2.tick_params(axis='y')
         plt.ylim([0, 10])
         fig.tight_layout()  # otherwise the right y-label is slightly clipped
-        plt.xlim([0, self.num_experiments])
-        # plt.xticks(np.arange(0, self.num_experiments/100, self.AGGREGATE_STATS_EVERY))
 
         plt.legend(loc="upper right")
         plt.savefig("./plots/" + self.NAME + '-avg-wall-' + str(len(self.average_reward_list)) + '-' + str(time.time()) + ".png")
