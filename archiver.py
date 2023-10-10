@@ -9,8 +9,10 @@
 
 import matplotlib.pyplot as plt
 import time
+from datetime import datetime
 import os
 import numpy as np
+import tensorflow as tf
 
 # The above class, MyClass, is used to store and manipulate lists of rewards, epsilon values, step
 # counts, and fruit counters, and provides methods to calculate averages and save a figure of the
@@ -27,8 +29,18 @@ class Archiver():
         # "plots" exists in the current working directory. If the directory does not exist, it creates a new
         # directory named "plots". This is done to ensure that the directory exists before saving any plots to
         # it.
-        if not os.path.isdir('plots'):
-            os.makedirs('plots')
+        if not os.path.isdir("Experiments"):
+            os.makedirs("Experiments")
+
+        self.timestamp = date_time = datetime.fromtimestamp(time.time())
+        self.timestring = date_time.strftime("%m_%d_%Y_%H_%M_%S")
+        self.NAME = name
+        self.experimentRoot = "Experiments/" + self.NAME + "_" + self.timestring
+        if not os.path.isdir(self.experimentRoot):
+            os.makedirs(self.experimentRoot)
+            os.makedirs(self.experimentRoot + '/plots')
+            os.makedirs(self.experimentRoot + '/models')
+            os.makedirs(self.experimentRoot + '/data')
 
         self.ep_rewards = []
         self.ep_rewards_norm = []
@@ -36,13 +48,14 @@ class Archiver():
         self.steps_before_death = []
         self.fruits_eaten = []
         self.AGGREGATE_STATS_EVERY = every
-        self.NAME = name
         self.average_reward_list = []
         self.average_step_list = []
         self.average_fruit_list = []
         self.min_reward_list = []
         self.max_reward_list = []
         self.num_experiments = num_experiments
+        self.timestamp = date_time = datetime.fromtimestamp(time.time())
+
 
     def appendLists(self, episode_reward, epsilon, step_count, fruit_counter):
         """
@@ -81,7 +94,21 @@ class Archiver():
         self.max_reward_list.append(max_reward)
         del average_reward, average_step, average_fruits, min_reward, max_reward
         
-        
+    def saveModel(self, model):
+        model.save(self.experimentRoot + "/models/" + self.NAME + str(len(self.average_reward_list)) + ".keras")
+
+    def saveData(self):
+        movingData = {
+            "average_reward_list": self.average_reward_list,
+            "average_step_list": self.average_step_list,
+            "average_fruit_list": self.average_fruit_list,
+            "min_reward_list": self.min_reward_list,
+            "max_reward_list": self.max_reward_list,
+            }
+
+        np.save(self.experimentRoot + "/data/" + self.NAME + str(len(self.average_reward_list)) + ".npy", movingData)
+        del movingData
+
     def saveFig(self):
         """
         The `saveFig` function saves a figure with multiple plots to a file.
@@ -108,7 +135,7 @@ class Archiver():
         fig.tight_layout()  # otherwise the right y-label is slightly clipped
 
         plt.legend(loc="upper right")
-        plt.savefig("./plots/" + self.NAME + '-avg-wall-' + str(len(self.average_reward_list)) + '-' + str(time.time()) + ".png")
+        plt.savefig(self.experimentRoot + "/plots/" + self.NAME + str(len(self.average_reward_list)) + ".png")
         plt.clf()
 
         del fig, ax1, ax2

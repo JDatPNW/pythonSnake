@@ -126,6 +126,9 @@ def main(episode):
     if not episode % AGGREGATE_STATS_EVERY:
         plot.averageLists()
         plot.saveFig()
+        plot.saveData()
+        plot.saveModel(agent.target_model)
+
     log.log(episode, step_count, reward, episode_reward, action, (game.direction), (game.SNAKE[0]), dead, epsilon, run_into_self, cause, fruit_counter)
            
     # Decay epsilon
