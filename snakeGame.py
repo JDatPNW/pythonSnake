@@ -17,7 +17,7 @@ import random
 # field and snake, handling eating, and controlling the snake's direction.
 class snakeGame():
         
-    def __init__(self, width, height, length, fruit_num, can_teleport):
+    def __init__(self, width, height, length, fruit_num, can_teleport, reward_step, reward_fruit, reward_into_self, reward_wall):
         """
         The above function is a Python class constructor that initializes the attributes of a snake game.
         
@@ -41,6 +41,11 @@ class snakeGame():
 
         self.num_fruits = fruit_num
         self.can_teleport = can_teleport
+
+        self.reward_into_self = reward_into_self
+        self.reward_wall = reward_wall
+        self.reward_fruit = reward_fruit
+        self.reward_step = reward_step
 
     def initGame(self):
         """
@@ -150,14 +155,15 @@ class snakeGame():
     def eat(self):
         """
         The function "eat" checks if the snake's head is on a food item, and if so, increases the snake's
-        length, updates the field, and returns the updated field and a reward of 25; otherwise, it returns
+        length, updates the field, and returns the updated field and a reward of 2
+        ; otherwise, it returns
         the original field and a reward of 0.
         :return: the updated field and the reward.
         """
         if(self.field[self.SNAKE[0][0]][self.SNAKE[0][1]] == 7):
             self.LENGTH +=1
             counter = 0
-            reward = 25
+            reward = self.reward_fruit
             while(counter < 1):
                 x = random.randint(1,self.WIDTH-2)
                 y = random.randint(1,self.HEIGHT-2)
@@ -180,7 +186,7 @@ class snakeGame():
 
         run_into_self = False
 
-        #MANUAL
+        #MANUAL controls using import keyboard
         '''
         direction = list(direction)
         if(keyboard.is_pressed("w")):

@@ -39,19 +39,28 @@ MINIBATCH_SIZE = 64  # How many steps (samples) to use for training
 UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
 AGGREGATE_STATS_EVERY = 100  # episodes used for averaging for plotting
 LOG_EVERY_STEP = True # Log into console every step?
-TF_VERBOSE = True
-EXPERIMENT_NAME = "Snake-post-changes"
+TF_VERBOSE = True # TF print outs
+EXPERIMENT_NAME = "Snake-post-changes" # Name used for files and folders for data
+MAX_STEPS = 150 # Steps before game will automatically reset (to keep the game of going on forever once the agent becomes very good at playing)
+
+reward_fruit = 25
+reward_into_self = -5
+reward_step = -0.1
+reward_wall = -50
+
 
 # The code is creating instances of three different classes: `DQNAgent`, `snakeGame`,, `Archiver` and 'Logger'.
 agent = DQNAgent.DQNAgent(REPLAY_MEMORY_SIZE, MIN_REPLAY_MEMORY_SIZE, MINIBATCH_SIZE, UPDATE_TARGET_EVERY, 
                           DISCOUNT, WIDTH, HEIGHT, ACTION_SPACE_SIZE, TF_VERBOSE)
-game = snakeGame.snakeGame(WIDTH, HEIGHT, START_LENGTH, NUM_FRUIT, CAN_PORT)
+game = snakeGame.snakeGame(WIDTH, HEIGHT, START_LENGTH, NUM_FRUIT, CAN_PORT, 
+                           reward_step, reward_fruit, reward_into_self, reward_wall)
 plot = archiver.Archiver(AGGREGATE_STATS_EVERY, EXPERIMENT_NAME, EPISODES)
 log = logger.Logger()
 
 epsilon = 1 # Start Value for Epsilon
 EPSILON_DECAY = 0.9995 # Rate at which Epsilon decays
-MIN_EPSILON = 0.1 # Value where that decay stops
+MIN_EPSILON = 0.01 # Value where that decay stops
+EPISODES_BEFORE_DECAY = 31 # episodes before epsilon dacay will start
 
 def main(episode):
     """
@@ -92,16 +101,16 @@ def main(episode):
         
         done = dead
         if dead:
-            reward = -50
+            reward = reward_wall
 
         elif run_into_self:
-            reward = -5
+            reward = reward_into_self
 
-        if reward == 25:
+        if reward == reward_fruit:
             fruit_counter += 1
 
-        if not dead and not run_into_self and reward != 25:
-            reward = -0.1
+        if not dead and not run_into_self and reward != reward_fruit:
+            reward = reward_step
 
         # Transform new continous state to new discrete state and count reward
         episode_reward += reward
@@ -114,7 +123,7 @@ def main(episode):
         del new_state
         
         step_count += 1
-        if(step_count >= 150):
+        if(step_count >= MAX_STEPS):
             done = True
         
         
@@ -132,7 +141,7 @@ def main(episode):
     log.log(episode, step_count, reward, episode_reward, action, (game.direction), (game.SNAKE[0]), dead, epsilon, run_into_self, cause, fruit_counter)
            
     # Decay epsilon
-    if epsilon > MIN_EPSILON and episode > 31:
+    if epsilon > MIN_EPSILON and episode > EPISODES_BEFORE_DECAY:
         epsilon *= EPSILON_DECAY
         epsilon = max(MIN_EPSILON, epsilon)
 
@@ -143,3 +152,18 @@ for episode in tqdm(range(1, EPISODES + 1), ascii=True, unit='episodes'):
     main(episode)
     tf.keras.backend.clear_session()
     gc.collect()
+
+'''
+ TODO:
+    1. make more things parameters: Wall Death vs teleport certain reward value or scenarios?
+    1. add reward function as in paper
+    1. read entire paper, check differences
+    .
+    .
+    .
+    99. add more features such as:
+        - wall blocks in field (block that spawn random on field like food (but only during init) , but different color that kill the snake
+        - other fruit types (for more points, food ranking) - make dynamic if possible
+        - diagonal walking
+        - multiple snakes
+  '''
