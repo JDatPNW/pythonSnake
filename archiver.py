@@ -76,7 +76,6 @@ class Archiver():
         self.steps_before_death.append(step_count)
         self.fruits_eaten.append(fruit_counter)
 
-
     def averageLists(self):
         """
         The function calculates the average, minimum, and maximum values of rewards, steps, and fruits eaten
@@ -93,11 +92,23 @@ class Archiver():
         self.min_reward_list.append(min_reward)
         self.max_reward_list.append(max_reward)
         del average_reward, average_step, average_fruits, min_reward, max_reward
-        
+
+    def saveSetup(self):
+        # TODO: make this save all params to file
+        pass
+
     def saveModel(self, model):
+        """
+        The `saveModel` function saves a given tf model to a specific file path.
+        
+        :param model: The `model` parameter is an instance of a machine learning model that you want to save
+        """
         model.save(self.experimentRoot + "/models/" + self.NAME + str(len(self.average_reward_list)) + ".keras")
 
     def saveData(self):
+        """
+        The `saveData` function saves the data from various lists into a numpy file.
+        """
         movingData = {
             "average_reward_list": self.average_reward_list,
             "average_step_list": self.average_step_list,
