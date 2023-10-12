@@ -50,7 +50,7 @@ reward_into_self = -5 # reward for trying to run into oneself (180 turn)
 reward_step = -0.1 # reward given at every step
 reward_wall = -50 # reward for walking into the wall and dying
 
-renderVisual = True # uses pygame to draw the game state
+renderVisual = False # uses pygame to draw the game state
 renderText = False # Uses print statements to print the game
 renderText_conv = False # renders text and converts it for better readability
 renderText_num = False # renders text and keeps number format - better for debugging

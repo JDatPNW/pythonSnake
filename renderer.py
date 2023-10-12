@@ -26,23 +26,23 @@ class Renderer:
         integer value that represents different game modes. The specific values and their meanings would
         depend on the implementation of the game
         """
-        # TODO: Fix issue with the buffer area around the edges - currently not part of the visual render
         self.textRenderer = text
         self.visualRenderer = visual
         self.BLACK = (0, 0, 0)
         self.WHITE = (255, 255, 255)
         self.GREEN = (0, 255, 0)
+        self.GREY = (111, 111, 111)
         self.RED = (255, 0, 0)
         self.YELLOW = (255, 255, 0)
         self.MARGIN = 2
-        self.gameLogicWidth = gameLogicWidth
-        self.gameLogicHeight = gameLogicHeight
+        self.gameLogicWidth = gameLogicWidth 
+        self.gameLogicHeight = gameLogicHeight 
         self.numMode = numMode
         self.convertedMode = convMode
-        self.WIDTH = gameLogicWidth
-        self.HEIGHT = gameLogicHeight
+        self.WIDTH = 12
+        self.HEIGHT = 12
         # Set the HEIGHT and WIDTH of the screen
-        self.WINDOW_SIZE = [self.gameLogicWidth*(self.WIDTH + self.MARGIN), self.gameLogicHeight*(self.HEIGHT + self.MARGIN)]
+        self.WINDOW_SIZE = [(self.gameLogicWidth + 2)*(self.WIDTH + self.MARGIN), (self.gameLogicHeight + 2)*(self.HEIGHT + self.MARGIN)]
         if self.visualRenderer:
             pygame.init()
             self.screen = pygame.display.set_mode(self.WINDOW_SIZE)
@@ -117,6 +117,8 @@ class Renderer:
                     color = self.RED
                 elif field[row][column] == 4:
                     color = self.YELLOW
+                elif row == 0 or row == (self.gameLogicHeight + 1) or column == 0 or column == (self.gameLogicWidth + 1):
+                    color = self.GREY
 
                 pygame.draw.rect(self.screen,
                                 color,
