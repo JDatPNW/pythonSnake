@@ -16,6 +16,7 @@ colored_traceback.add_hook()
 import tensorflow as tf
 from memory_profiler import profile
 import gc
+import io
 
 # class imports
 import DQNAgent
@@ -43,11 +44,12 @@ TF_VERBOSE = True # TF print outs
 EXPERIMENT_NAME = "Snake-post-changes" # Name used for files and folders for data
 MAX_STEPS = 150 # Steps before game will automatically reset (to keep the game of going on forever once the agent becomes very good at playing)
 
-reward_fruit = 25
-reward_into_self = -5
-reward_step = -0.1
-reward_wall = -50
+reward_fruit = 25 # reward for picking up a fruit
+reward_into_self = -5 # reward for trying to run into oneself (180 turn)
+reward_step = -0.1 # reward given at every step
+reward_wall = -50 # reward for walking into the wall and dying
 
+notes = "Add notes here about the experiment that might be of use, will be saved to setup file" # Add notes here about the experiment that might be of use, will be saved to setup file
 
 # The code is creating instances of three different classes: `DQNAgent`, `snakeGame`,, `Archiver` and 'Logger'.
 agent = DQNAgent.DQNAgent(REPLAY_MEMORY_SIZE, MIN_REPLAY_MEMORY_SIZE, MINIBATCH_SIZE, UPDATE_TARGET_EVERY, 
@@ -61,6 +63,17 @@ epsilon = 1 # Start Value for Epsilon
 EPSILON_DECAY = 0.9995 # Rate at which Epsilon decays
 MIN_EPSILON = 0.01 # Value where that decay stops
 EPISODES_BEFORE_DECAY = 31 # episodes before epsilon dacay will start
+
+stream = io.StringIO()
+agent.target_model.summary(print_fn=lambda x: stream.write(x + '\n'))
+summary_string = stream.getvalue()
+stream.close()
+del stream
+
+plot.saveSetup(ACTION_SPACE_SIZE, WIDTH, HEIGHT, START_LENGTH, NUM_FRUIT, CAN_PORT, EPISODES, DISCOUNT, 
+               REPLAY_MEMORY_SIZE, MIN_REPLAY_MEMORY_SIZE, MINIBATCH_SIZE, UPDATE_TARGET_EVERY, AGGREGATE_STATS_EVERY, 
+               LOG_EVERY_STEP, EXPERIMENT_NAME, MAX_STEPS, reward_fruit, reward_into_self, reward_step, reward_wall, epsilon, 
+               EPSILON_DECAY, MIN_EPSILON, EPISODES_BEFORE_DECAY, agent.model.get_config(), summary_string, notes)
 
 def main(episode):
     """

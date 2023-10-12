@@ -93,9 +93,17 @@ class Archiver():
         self.max_reward_list.append(max_reward)
         del average_reward, average_step, average_fruits, min_reward, max_reward
 
-    def saveSetup(self):
+    def saveSetup(self,ACTION_SPACE_SIZE, WIDTH, HEIGHT, START_LENGTH, NUM_FRUIT, CAN_PORT, EPISODES, DISCOUNT, REPLAY_MEMORY_SIZE, 
+                  MIN_REPLAY_MEMORY_SIZE, MINIBATCH_SIZE, UPDATE_TARGET_EVERY, AGGREGATE_STATS_EVERY, LOG_EVERY_STEP, EXPERIMENT_NAME, 
+                  MAX_STEPS, reward_fruit, reward_into_self, reward_step, reward_wall, epsilon, EPSILON_DECAY, MIN_EPSILON, EPISODES_BEFORE_DECAY, model, summary_string, notes):
         # TODO: make this save all params to file
-        pass
+        # saving setup 
+
+        setup = f"{ACTION_SPACE_SIZE=}\n{WIDTH=}\n{HEIGHT=}\n{START_LENGTH=}\n{NUM_FRUIT=}\n{CAN_PORT=}\n{EPISODES=}\n{DISCOUNT=}\n{REPLAY_MEMORY_SIZE=}\n"
+        setup += f"{MIN_REPLAY_MEMORY_SIZE=}\n{MIN_REPLAY_MEMORY_SIZE=}\n{MINIBATCH_SIZE=}\n{UPDATE_TARGET_EVERY=}\n{epsilon=}\n{AGGREGATE_STATS_EVERY=}\n{LOG_EVERY_STEP=}\n{EXPERIMENT_NAME=}\n"
+        setup += f"{MAX_STEPS=}\n{reward_fruit=}\n{reward_into_self=}\n{reward_step=}\n{reward_wall=}\n{epsilon=}\n{EPSILON_DECAY=}\n"
+        setup += f"{MIN_EPSILON=}\n{EPISODES_BEFORE_DECAY=}\n{model=}\n{summary_string=}\n{notes=}\n"
+        print(setup, file=open(self.experimentRoot + "/setup.out", 'w'))  # saves hyperparameters to the experiment folder
 
     def saveModel(self, model):
         """
