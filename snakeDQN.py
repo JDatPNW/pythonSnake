@@ -23,14 +23,15 @@ import DQNAgent
 import snakeGame
 import archiver
 import logger
+import renderer
 
 # These are the parameters and settings used in the snake game and the DQN agent. Here is a brief
 # explanation of each parameter:
 ACTION_SPACE_SIZE = 5 # Number possible actions
 WIDTH = 12 # Width of playable field
 HEIGHT = 12 # Height of playable field
-START_LENGTH = 1 # Starting Length for snake
-NUM_FRUIT = (WIDTH+HEIGHT)/2 # NUMBER OF APPLES SPAWNED
+START_LENGTH = 3 # Starting Length for snake
+NUM_FRUIT = 1 # NUMBER OF APPLES SPAWNED
 CAN_PORT = True # Can the snake come back from the opposite site when hitting the wall?
 EPISODES = 50_000 # Number of episodes
 DISCOUNT = 0.99 # Discount factor / alpha
@@ -49,6 +50,13 @@ reward_into_self = -5 # reward for trying to run into oneself (180 turn)
 reward_step = -0.1 # reward given at every step
 reward_wall = -50 # reward for walking into the wall and dying
 
+renderVisual = True # uses pygame to draw the game state
+renderText = False # Uses print statements to print the game
+renderText_conv = False # renders text and converts it for better readability
+renderText_num = False # renders text and keeps number format - better for debugging
+sleepText = 0 # time the game will sleep between text state print renders
+sleepVisual = 0 # time the game will sleep between visual state print renders 
+
 notes = "Add notes here about the experiment that might be of use, will be saved to setup file" # Add notes here about the experiment that might be of use, will be saved to setup file
 
 # The code is creating instances of three different classes: `DQNAgent`, `snakeGame`,, `Archiver` and 'Logger'.
@@ -58,6 +66,7 @@ game = snakeGame.snakeGame(WIDTH, HEIGHT, START_LENGTH, NUM_FRUIT, CAN_PORT,
                            reward_step, reward_fruit, reward_into_self, reward_wall)
 plot = archiver.Archiver(AGGREGATE_STATS_EVERY, EXPERIMENT_NAME, EPISODES)
 log = logger.Logger()
+render = renderer.Renderer(renderText, renderVisual, WIDTH, HEIGHT, renderText_conv, renderText_num)
 
 epsilon = 1 # Start Value for Epsilon
 EPSILON_DECAY = 0.9995 # Rate at which Epsilon decays
@@ -73,7 +82,8 @@ del stream
 plot.saveSetup(ACTION_SPACE_SIZE, WIDTH, HEIGHT, START_LENGTH, NUM_FRUIT, CAN_PORT, EPISODES, DISCOUNT, 
                REPLAY_MEMORY_SIZE, MIN_REPLAY_MEMORY_SIZE, MINIBATCH_SIZE, UPDATE_TARGET_EVERY, AGGREGATE_STATS_EVERY, 
                LOG_EVERY_STEP, EXPERIMENT_NAME, MAX_STEPS, reward_fruit, reward_into_self, reward_step, reward_wall, epsilon, 
-               EPSILON_DECAY, MIN_EPSILON, EPISODES_BEFORE_DECAY, agent.model.get_config(), summary_string, notes)
+               EPSILON_DECAY, MIN_EPSILON, EPISODES_BEFORE_DECAY, agent.model.get_config(), summary_string, 
+               renderVisual, renderText, renderText_conv, renderText_num, sleepText, sleepVisual, notes)
 
 def main(episode):
     """
@@ -110,6 +120,12 @@ def main(episode):
         field = game.update_field()
 
         new_state = np.array(field) # jd^:
+
+        if renderText:
+            render.textRender(field, sleepText)
+        if renderVisual:
+            render.visualRender(field, sleepVisual)
+
         del field
         
         done = dead

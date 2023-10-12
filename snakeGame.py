@@ -84,14 +84,14 @@ class snakeGame():
             x = random.randint(1, self.WIDTH-2)
             y = random.randint(1, self.HEIGHT-2)
             if(self.field[x][y]== 0):
-                self.field[x][y] = 7
+                self.field[x][y] = 7 # fruit = 7
                 counter += 1
         del row, _, start_dir, counter, x, y
         return self.field
 
     def update_field(self):
         """
-        The function updates the game field by setting all non-7 values to 0, setting the snake body to 1,
+        The function updates the game field by setting all non-7 (7 is fruit) values to 0, setting the snake body to 1,
         and setting the snake head to 4.
         :return: the updated field.
         """
