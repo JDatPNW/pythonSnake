@@ -13,6 +13,7 @@ from datetime import datetime
 import os
 import numpy as np
 import tensorflow as tf
+import json
 
 # The above class, MyClass, is used to store and manipulate lists of rewards, epsilon values, step
 # counts, and fruit counters, and provides methods to calculate averages and save a figure of the
@@ -98,12 +99,15 @@ class Archiver():
                   MAX_STEPS, reward_fruit, reward_into_self, reward_step, reward_wall, epsilon, EPSILON_DECAY, MIN_EPSILON, EPISODES_BEFORE_DECAY, model, summary_string, notes):
         # TODO: make this save all params to file
         # saving setup 
+        json_model = json.dumps(model, indent = 4)  
 
         setup = f"{ACTION_SPACE_SIZE=}\n{WIDTH=}\n{HEIGHT=}\n{START_LENGTH=}\n{NUM_FRUIT=}\n{CAN_PORT=}\n{EPISODES=}\n{DISCOUNT=}\n{REPLAY_MEMORY_SIZE=}\n"
         setup += f"{MIN_REPLAY_MEMORY_SIZE=}\n{MIN_REPLAY_MEMORY_SIZE=}\n{MINIBATCH_SIZE=}\n{UPDATE_TARGET_EVERY=}\n{epsilon=}\n{AGGREGATE_STATS_EVERY=}\n{LOG_EVERY_STEP=}\n{EXPERIMENT_NAME=}\n"
         setup += f"{MAX_STEPS=}\n{reward_fruit=}\n{reward_into_self=}\n{reward_step=}\n{reward_wall=}\n{epsilon=}\n{EPSILON_DECAY=}\n"
-        setup += f"{MIN_EPSILON=}\n{EPISODES_BEFORE_DECAY=}\n{model=}\n{summary_string=}\n{notes=}\n"
+        setup += f"{MIN_EPSILON=}\n{EPISODES_BEFORE_DECAY=}\n{notes=}\n"
+        setup += "\nModel Summary=\n" + summary_string + "\n=====MORE DETAILED VERSION BELOW=====\nDetailed Model=\n" + json_model
         print(setup, file=open(self.experimentRoot + "/setup.out", 'w'))  # saves hyperparameters to the experiment folder
+        del json_model
 
     def saveModel(self, model):
         """
