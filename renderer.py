@@ -123,6 +123,12 @@ class Renderer:
         # Go ahead and update the screen with what we've drawn.
         pygame.display.flip()
 
+        # TODO: Make this an option as state input - converts screen to image array
+        # x3 = pygame.surfarray.pixels3d(self.screen)
+        # x3 = x3[:,:,::-1] 
+        # print(x3)
+
+
     def quitPygame(self):
         pygame.quit()
 
