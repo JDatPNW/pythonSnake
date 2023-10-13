@@ -49,6 +49,7 @@ reward_fruit = 25 # reward for picking up a fruit
 reward_into_self = -5 # reward for trying to run into oneself (180 turn)
 reward_step = -0.1 # reward given at every step
 reward_wall = -50 # reward for walking into the wall and dying
+RENDER_EVERY = 50 # every n-th episode the game will be rendered
 
 renderVisual = False # uses pygame to draw the game state
 renderText = False # Uses print statements to print the game
@@ -83,7 +84,7 @@ plot.saveSetup(ACTION_SPACE_SIZE, WIDTH, HEIGHT, START_LENGTH, NUM_FRUIT, CAN_PO
                REPLAY_MEMORY_SIZE, MIN_REPLAY_MEMORY_SIZE, MINIBATCH_SIZE, UPDATE_TARGET_EVERY, AGGREGATE_STATS_EVERY, 
                LOG_EVERY_STEP, EXPERIMENT_NAME, MAX_STEPS, reward_fruit, reward_into_self, reward_step, reward_wall, epsilon, 
                EPSILON_DECAY, MIN_EPSILON, EPISODES_BEFORE_DECAY, agent.model.get_config(), summary_string, 
-               renderVisual, renderText, renderText_conv, renderText_num, sleepText, sleepVisual, notes)
+               renderVisual, renderText, renderText_conv, renderText_num, sleepText, sleepVisual, RENDER_EVERY, notes)
 
 def main(episode):
     """
@@ -98,6 +99,10 @@ def main(episode):
     # Reset environment and get initial state
     dead = False
     current_state = np.array(list(game.initGame()))
+
+    if not episode % RENDER_EVERY:
+        if renderVisual:
+            render.InitPygame()
 
     # Reset flag and start iterating until episode ends
     done = False
@@ -121,10 +126,11 @@ def main(episode):
 
         new_state = np.array(field) # jd^:
 
-        if renderText:
-            render.textRender(field, sleepText)
-        if renderVisual:
-            render.visualRender(field, sleepVisual)
+        if not episode % RENDER_EVERY:
+            if renderText:
+                render.textRender(field, sleepText)
+            if renderVisual:
+                render.visualRender(field, sleepVisual)
 
         del field
         
@@ -173,6 +179,10 @@ def main(episode):
     if epsilon > MIN_EPSILON and episode > EPISODES_BEFORE_DECAY:
         epsilon *= EPSILON_DECAY
         epsilon = max(MIN_EPSILON, epsilon)
+
+    if not episode % RENDER_EVERY:
+        if renderVisual:
+            render.quitPygame()
 
     del step_count, reward, episode_reward, action, dead, run_into_self, cause, current_state
 

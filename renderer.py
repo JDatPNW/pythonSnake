@@ -43,14 +43,6 @@ class Renderer:
         self.HEIGHT = 12
         # Set the HEIGHT and WIDTH of the screen
         self.WINDOW_SIZE = [(self.gameLogicWidth + 2)*(self.WIDTH + self.MARGIN), (self.gameLogicHeight + 2)*(self.HEIGHT + self.MARGIN)]
-        if self.visualRenderer:
-            pygame.init()
-            self.screen = pygame.display.set_mode(self.WINDOW_SIZE)
-            # Set title of screen
-            pygame.display.set_caption("Snake")
-            # Used to manage how fast the screen updates
-            self.clock = pygame.time.Clock()
-
 
     def textRender(self, field, sleep):
         """
@@ -130,3 +122,14 @@ class Renderer:
         self.clock.tick(60)
         # Go ahead and update the screen with what we've drawn.
         pygame.display.flip()
+
+    def quitPygame(self):
+        pygame.quit()
+
+    def InitPygame(self):
+        pygame.init()
+        self.screen = pygame.display.set_mode(self.WINDOW_SIZE)
+        # Set title of screen
+        pygame.display.set_caption("Snake")
+        # Used to manage how fast the screen updates
+        self.clock = pygame.time.Clock()
