@@ -17,6 +17,10 @@ import tensorflow as tf
 from memory_profiler import profile
 import gc
 import io
+import math
+import psutil
+import time
+import GPUtil
 
 # class imports
 import DQNAgent
@@ -27,13 +31,13 @@ import renderer
 
 # These are the parameters and settings used in the snake game and the DQN agent. Here is a brief
 # explanation of each parameter:
-ACTION_SPACE_SIZE = 5 # Number possible actions
+ACTION_SPACE_SIZE = 4 # Number possible actions
 WIDTH = 12 # Width of playable field
 HEIGHT = 12 # Height of playable field
 START_LENGTH = 3 # Starting Length for snake
 NUM_FRUIT = 1 # NUMBER OF APPLES SPAWNED
-CAN_PORT = True # Can the snake come back from the opposite site when hitting the wall?
-EPISODES = 50_000 # Number of episodes
+CAN_PORT = False # Can the snake come back from the opposite site when hitting the wall?
+EPISODES = 10_000 # Number of episodes
 DISCOUNT = 0.99 # Discount factor / alpha
 REPLAY_MEMORY_SIZE = 50_000  # How many last steps to keep for model training
 MIN_REPLAY_MEMORY_SIZE = 1_000  # Minimum number of steps in a memory to start training
@@ -41,15 +45,17 @@ MINIBATCH_SIZE = 64  # How many steps (samples) to use for training
 UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
 AGGREGATE_STATS_EVERY = 100  # episodes used for averaging for plotting
 LOG_EVERY_STEP = True # Log into console every step?
-TF_VERBOSE = True # TF print outs
-EXPERIMENT_NAME = "Snake-post-changes" # Name used for files and folders for data
+TF_VERBOSE = 0 # TF print outs
+EXPERIMENT_NAME = "with_Distance" # Name used for files and folders for data
 MAX_STEPS = 150 # Steps before game will automatically reset (to keep the game of going on forever once the agent becomes very good at playing)
 
 reward_fruit = 25 # reward for picking up a fruit
-reward_into_self = -5 # reward for trying to run into oneself (180 turn)
-reward_step = -0.1 # reward given at every step
+reward_into_self = 0 # reward for trying to run into oneself (180 turn)
+reward_step = 0 # reward given at every step
 reward_wall = -50 # reward for walking into the wall and dying
-RENDER_EVERY = 50 # every n-th episode the game will be rendered
+reward_distance = True # whether or not to use the distance reward (recommended to use)
+reward_distance_exponent = 10 # The exponent of by which the distance reward will be calculated, the larger the number, the smaller the reward
+RENDER_EVERY = 10 # every n-th episode the game will be rendered
 
 renderVisual = False # uses pygame to draw the game state
 renderText = False # Uses print statements to print the game
@@ -57,8 +63,10 @@ renderText_conv = False # renders text and converts it for better readability
 renderText_num = False # renders text and keeps number format - better for debugging
 sleepText = 0 # time the game will sleep between text state print renders
 sleepVisual = 0 # time the game will sleep between visual state print renders 
+trackGPU = True # can be used when using a GPU - WARNING very slow! Also does measure GPU usage of system! not only process
+GPU_id = 0 # use the ID of the GPU that is being used
 
-notes = "Add notes here about the experiment that might be of use, will be saved to setup file" # Add notes here about the experiment that might be of use, will be saved to setup file
+notes = "New reward function, no penanty for running into self and stepping" # Add notes here about the experiment that might be of use, will be saved to setup file
 
 # The code is creating instances of three different classes: `DQNAgent`, `snakeGame`,, `Archiver` and 'Logger'.
 agent = DQNAgent.DQNAgent(REPLAY_MEMORY_SIZE, MIN_REPLAY_MEMORY_SIZE, MINIBATCH_SIZE, UPDATE_TARGET_EVERY, 
@@ -71,7 +79,7 @@ render = renderer.Renderer(renderText, renderVisual, WIDTH, HEIGHT, renderText_c
 
 epsilon = 1 # Start Value for Epsilon
 EPSILON_DECAY = 0.9995 # Rate at which Epsilon decays
-MIN_EPSILON = 0.01 # Value where that decay stops
+MIN_EPSILON = 0.001 # Value where that decay stops
 EPISODES_BEFORE_DECAY = 31 # episodes before epsilon dacay will start
 
 stream = io.StringIO()
@@ -79,6 +87,11 @@ agent.target_model.summary(print_fn=lambda x: stream.write(x + '\n'))
 summary_string = stream.getvalue()
 stream.close()
 del stream
+
+process = psutil.Process() # tracks cpu and ram
+if trackGPU and agent.has_gpu: # checks if tf sees GPU, gets id and uses for tracking
+    gpu = GPUtil.getGPUs()
+    gpu = gpu[agent.gpu_id]
 
 plot.saveSetup(ACTION_SPACE_SIZE, WIDTH, HEIGHT, START_LENGTH, NUM_FRUIT, CAN_PORT, EPISODES, DISCOUNT, 
                REPLAY_MEMORY_SIZE, MIN_REPLAY_MEMORY_SIZE, MINIBATCH_SIZE, UPDATE_TARGET_EVERY, AGGREGATE_STATS_EVERY, 
@@ -105,6 +118,7 @@ def main(episode):
             render.InitPygame()
 
     # Reset flag and start iterating until episode ends
+    start = time.process_time()
     done = False
     while not done:
 
@@ -123,6 +137,7 @@ def main(episode):
         dead, cause = game.update_snake()
         field, reward = game.eat()
         field = game.update_field()
+        cpu, ram, step_time, gpu_load, gpu_mem = 0, 0, 0, 0, 0
 
         new_state = np.array(field) # jd^:
 
@@ -146,6 +161,9 @@ def main(episode):
 
         if not dead and not run_into_self and reward != reward_fruit:
             reward = reward_step
+        
+        if reward_distance:
+            reward += math.pow((game.max_distance - game.closest_distance) / game.max_distance, reward_distance_exponent)
 
         # Transform new continous state to new discrete state and count reward
         episode_reward += reward
@@ -161,19 +179,28 @@ def main(episode):
         if(step_count >= MAX_STEPS):
             done = True
         
-        
+        cpu = process.cpu_percent() # if bigger than 100 - multiple threads on multiple cores
+        ram = process.memory_percent()
+    
+        if trackGPU and agent.has_gpu:    
+            gpu = GPUtil.getGPUs()
+            gpu = gpu[agent.gpu_id]
+            gpu_load = gpu.load*100
+            gpu_mem = gpu.memoryUtil*100
+        step_time = time.process_time() - start
         if(LOG_EVERY_STEP):
-            log.log(episode, step_count, reward, episode_reward, action, (game.direction), (game.SNAKE[0]), dead, epsilon, run_into_self, cause, fruit_counter)
+            log.log(episode, step_count, reward, episode_reward, action, (game.direction), (game.head), (game.closest_fruit), dead, epsilon, run_into_self, cause, fruit_counter, game.closest_distance, cpu, ram, step_time, gpu_load, gpu_mem, agent.gpu_id)
 
+        
     # Append episode reward to a list and log stats (every given number of episodes)
-    plot.appendLists(episode_reward, epsilon, step_count, fruit_counter)
+    plot.appendLists(episode_reward, epsilon, step_count, fruit_counter, cpu, ram, step_time, gpu_load, gpu_mem)
     if not episode % AGGREGATE_STATS_EVERY:
         plot.averageLists()
         plot.saveFig()
         plot.saveData()
         plot.saveModel(agent.target_model)
 
-    log.log(episode, step_count, reward, episode_reward, action, (game.direction), (game.SNAKE[0]), dead, epsilon, run_into_self, cause, fruit_counter)
+    log.log(episode, step_count, reward, episode_reward, action, (game.direction), (game.head), (game.closest_fruit), dead, epsilon, run_into_self, cause, fruit_counter, game.closest_distance, cpu, ram, step_time, gpu_load, gpu_mem, agent.gpu_id)
            
     # Decay epsilon
     if epsilon > MIN_EPSILON and episode > EPISODES_BEFORE_DECAY:
@@ -184,7 +211,7 @@ def main(episode):
         if renderVisual:
             render.quitPygame()
 
-    del step_count, reward, episode_reward, action, dead, run_into_self, cause, current_state
+    del step_count, reward, episode_reward, action, dead, run_into_self, cause, current_state, ram, cpu, start, step_time
 
 # Iterate over episodes
 for episode in tqdm(range(1, EPISODES + 1), ascii=True, unit='episodes'):
