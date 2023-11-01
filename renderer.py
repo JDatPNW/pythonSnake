@@ -123,19 +123,56 @@ class Renderer:
         # Go ahead and update the screen with what we've drawn.
         pygame.display.flip()
 
-        # TODO: Make this an option as state input - converts screen to image array
-        # x3 = pygame.surfarray.pixels3d(self.screen)
-        # x3 = x3[:,:,::-1] 
-        # print(x3)
-
-
     def quitPygame(self):
+        """
+        The function `quitPygame` is used to quit the Pygame library.
+        """
         pygame.quit()
 
     def InitPygame(self):
+        """
+        The function initializes the Pygame library, sets the screen size and title, and creates a clock
+        object for managing screen updates.
+        """
         pygame.init()
         self.screen = pygame.display.set_mode(self.WINDOW_SIZE)
         # Set title of screen
         pygame.display.set_caption("Snake")
         # Used to manage how fast the screen updates
         self.clock = pygame.time.Clock()
+
+    def getScreenshot(self, field):
+        """
+        The `getScreenshot` function takes a field as input and returns a screenshot of the game grid with
+        different colored rectangles representing different elements in the field.
+        
+        :param field: The `field` parameter is a 2D list that represents the game grid. Each element in the
+        list represents a cell in the grid and contains a value that determines the color of the cell. The
+        values can be:
+        :return: a screenshot of the game field.
+        """
+        self.screen.fill(self.BLACK)
+
+        # Draw the grid
+        for row in range(self.gameLogicHeight + 2):
+            for column in range(self.gameLogicWidth + 2):
+                color = self.WHITE
+                if field[row][column] == 7:
+                    color = self.GREEN
+                elif field[row][column] == 1:
+                    color = self.RED
+                elif field[row][column] == 4:
+                    color = self.YELLOW
+                elif row == 0 or row == (self.gameLogicHeight + 1) or column == 0 or column == (self.gameLogicWidth + 1):
+                    color = self.GREY
+
+                pygame.draw.rect(self.screen,
+                                color,
+                                [(self.MARGIN + self.WIDTH) * column + self.MARGIN,
+                                (self.MARGIN + self.HEIGHT) * row + self.MARGIN,
+                                self.WIDTH,
+                                self.HEIGHT])
+
+        screenshot = pygame.surfarray.pixels3d(self.screen)
+        screenshot = screenshot[:,:,::-1] 
+        return screenshot
