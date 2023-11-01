@@ -55,10 +55,20 @@ class Archiver():
         self.min_reward_list = []
         self.max_reward_list = []
         self.num_experiments = num_experiments
+        self.cpu = []
+        self.average_cpu = []
+        self.ram = []
+        self.average_ram = []
+        self.gpu_load = []
+        self.average_gpu_load = []
+        self.gpu_mem = []
+        self.average_gpu_mem = []
+        self.step_time = []
+        self.average_step_time = []
         self.timestamp = date_time = datetime.fromtimestamp(time.time())
 
 
-    def appendLists(self, episode_reward, epsilon, step_count, fruit_counter):
+    def appendLists(self, episode_reward, epsilon, step_count, fruit_counter, cpu, ram, step_time, gpu_load, gpu_mem):
         """
         The function appends various values to different lists.
         
@@ -76,6 +86,11 @@ class Archiver():
         self.epsilon_over_time.append(epsilon)
         self.steps_before_death.append(step_count)
         self.fruits_eaten.append(fruit_counter)
+        self.cpu.append(cpu)
+        self.ram.append(ram)
+        self.gpu_load.append(gpu_load)
+        self.gpu_mem.append(gpu_mem)
+        self.step_time.append(step_time)
 
     def averageLists(self):
         """
@@ -87,12 +102,23 @@ class Archiver():
         average_fruits = sum(self.fruits_eaten[-self.AGGREGATE_STATS_EVERY:])/len(self.fruits_eaten[-self.AGGREGATE_STATS_EVERY:])
         min_reward = min(self.ep_rewards[-self.AGGREGATE_STATS_EVERY:])
         max_reward = max(self.ep_rewards[-self.AGGREGATE_STATS_EVERY:])
+        average_cpu = sum(self.cpu[-self.AGGREGATE_STATS_EVERY:])/len(self.cpu[-self.AGGREGATE_STATS_EVERY:])
+        average_ram = sum(self.ram[-self.AGGREGATE_STATS_EVERY:])/len(self.ram[-self.AGGREGATE_STATS_EVERY:])
+        average_gpu_load = sum(self.gpu_load[-self.AGGREGATE_STATS_EVERY:])/len(self.gpu_load[-self.AGGREGATE_STATS_EVERY:])
+        average_gpu_mem = sum(self.gpu_mem[-self.AGGREGATE_STATS_EVERY:])/len(self.gpu_mem[-self.AGGREGATE_STATS_EVERY:])
+        average_step_time = sum(self.step_time[-self.AGGREGATE_STATS_EVERY:])/len(self.step_time[-self.AGGREGATE_STATS_EVERY:])
+
         self.average_reward_list.append(average_reward)
         self.average_step_list.append(average_step)
         self.average_fruit_list.append(average_fruits)
         self.min_reward_list.append(min_reward)
         self.max_reward_list.append(max_reward)
-        del average_reward, average_step, average_fruits, min_reward, max_reward
+        self.average_cpu.append(average_cpu)
+        self.average_ram.append(average_ram)
+        self.average_gpu_load.append(average_gpu_load)
+        self.average_gpu_mem.append(average_gpu_mem)
+        self.average_step_time.append(average_step_time)
+        del average_reward, average_step, average_fruits, min_reward, max_reward, average_cpu, average_ram, average_step_time, average_gpu_load, average_gpu_mem
 
     def saveSetup(self,ACTION_SPACE_SIZE, WIDTH, HEIGHT, START_LENGTH, NUM_FRUIT, CAN_PORT, EPISODES, DISCOUNT, REPLAY_MEMORY_SIZE, 
                   MIN_REPLAY_MEMORY_SIZE, MINIBATCH_SIZE, UPDATE_TARGET_EVERY, AGGREGATE_STATS_EVERY, LOG_EVERY_STEP, EXPERIMENT_NAME, 
@@ -101,7 +127,6 @@ class Archiver():
         '''
         The `saveSetup` function saves the setup and hyperparameters of a model to a file.
         '''
-        # TODO: make this save all params to file
         # saving setup 
         json_model = json.dumps(model, indent = 4)  
 
@@ -131,6 +156,11 @@ class Archiver():
             "average_fruit_list": self.average_fruit_list,
             "min_reward_list": self.min_reward_list,
             "max_reward_list": self.max_reward_list,
+            "average_cpu": self.average_cpu,
+            "average_ram": self.average_ram,
+            "average_gpu_load": self.average_gpu_load,
+            "average_gpu_mem": self.average_gpu_mem,
+            "average_step_time": self.average_step_time
             }
 
         np.save(self.experimentRoot + "/data/" + self.NAME + str(len(self.average_reward_list)) + ".npy", movingData)

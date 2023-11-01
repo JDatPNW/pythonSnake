@@ -8,7 +8,7 @@
                                                    
 '''
 
-import psutil
+import os
 from colorama import Fore, Style
 
 # The Logger class is used to log information about each episode and step of a program.
@@ -19,7 +19,7 @@ class Logger():
         """
         pass
 
-    def log(self, episode, step, reward, reward_overall, action, direction, head, dead, epsilon, ran_into_self, cause, eaten):
+    def log(self, episode, step, reward, reward_overall, action, direction, head, fruit, dead, epsilon, ran_into_self, cause, eaten, distance, cpu, ram, step_time, gpu_load, gpu_mem, gpu_id):
         """
         The `log` function prints a formatted log message with various information about the episode, step,
         rewards, actions, and other details.
@@ -46,15 +46,26 @@ class Logger():
         itself, or reaching a maximum number of steps
         """
         print("\n\n")
-        print("-----------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+        print("--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
         print(Fore.RED)
-        print ('| {:<5} | {:<5} | {:<13} | {:<12} | {:<10} | {:<15} | {:<7} | {:<10} | {:<10} | {:<5} | {:<12} | {:<12} | {:<15} |'.format('EP','Step', 'Epsilon', 'Step Reward', 'Fruits Eaten', 'Ep Reward', 'Action', 'Dir', 'Head', 'Dead', 'Cause', 'Into Self', 'RAM'))
+        print ('| {:<5} | {:<5} | {:<13} | {:<12} | {:<15} | {:<15} | {:<7} | {:<10} | {:<10} | {:<10} | {:<10} |'.format('EP','Step', 'Epsilon', 'Step Reward', 'Fruits Eaten', 'Ep Reward', 'Action', 'Dir', 'Head', 'Fruit', 'Distance'))
         print(Style.RESET_ALL)
-        print("-----------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+        print("--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
         print(Fore.YELLOW)
-        print ('| {:<5} | {:<5} | {:<13} | {:<12} | {:<10} | {:<15} | {:<7} | {:<10} | {:<10} | {:<5} | {:<12} | {:<12} | {:<15} |'.format(episode, step, round(epsilon, 10), reward, eaten, round(reward_overall, 1), action, str(direction), str(head), dead, cause, ran_into_self, (str(psutil.virtual_memory().used // 1e6) + "MB")))
+        print ('| {:<5} | {:<5} | {:<13} | {:<12} | {:<15} | {:<15} | {:<7} | {:<10} | {:<10} | {:<10} | {:<10} |'.format(episode, step, round(epsilon, 10), round(reward, 4), eaten, round(reward_overall, 1), action, str(direction), str(head), str(fruit), round(distance, 5)))
         print(Style.RESET_ALL)
-        print("-----------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+        print("--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+
+        print("--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+        print(Fore.RED)
+        print ('| {:<7} | {:<12} | {:<12} | {:<7} | {:<7} | {:<7} | {:<10} | {:<10} | {:<10} | {:<10} |'.format('Dead', 'Cause', 'Into Self', 'PID', 'CPU %', 'RAM %', 'GPU ID', 'GPU Load %', 'GPU Mem %', 'Step Time'))
+        print(Style.RESET_ALL)
+        print("--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+        print(Fore.YELLOW)
+        print ('| {:<7} | {:<12} | {:<12} | {:<7} | {:<7} | {:<7} | {:<10} | {:<10} | {:<10} | {:<10} |'.format(dead, cause, ran_into_self, os.getpid(), round(cpu, 5), round(ram, 5), gpu_id, round(gpu_load, 5), round(gpu_mem, 5), round(step_time, 7)))
+        print(Style.RESET_ALL)
+        print("--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+
         print("\n\n")
         print(Fore.GREEN)
         print("""

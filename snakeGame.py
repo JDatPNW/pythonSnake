@@ -11,6 +11,8 @@
 import random
 import numpy as np
 import random
+import math
+
 # import keyboard # if MANUAL
 
 # The snakeGame class represents a game of snake, with methods for initializing the game, updating the
@@ -34,9 +36,15 @@ class snakeGame():
         self.WIDTH = width
         self.HEIGHT = height
 
+        self.max_distance = math.dist([0,0], [width,height])
+
         self.LENGTH = length
         self.startingLENGTH = length
         self.SNAKE = [[int(self.HEIGHT/2), int(self.WIDTH/2)]] # TODO: check if they are in the right order or not
+        self.head = []
+        self.closest_fruit = []
+        self.closest_distance = self.max_distance
+        self.fruit_list = []
         self.direction = [1,0]  # [-N/+S , E+/-W]
 
         self.num_fruits = fruit_num
@@ -71,9 +79,9 @@ class snakeGame():
 
         self.LENGTH = self.startingLENGTH
         # If fixed starting point
-        # self.SNAKE = [[int(self.HEIGHT/2), int(self.WIDTH/2)]] # TODO: check if they are in the right order or not <- use this if no random starting
+        # self.SNAKE = [[int(self.HEIGHT/2), int(self.WIDTH/2)]] # TODO: check if they are in the right order or not TODO: use this if no random starting
         self.SNAKE = [[random.randint(0+3, self.HEIGHT-3), random.randint(0+3, self.WIDTH-3)]]
-
+        self.head = list(self.SNAKE[0])
         row = list([0] * (self.WIDTH+2))
         self.field = []
         for _ in range(self.WIDTH+2):
@@ -85,7 +93,9 @@ class snakeGame():
             y = random.randint(1, self.HEIGHT-2)
             if(self.field[x][y]== 0):
                 self.field[x][y] = 7 # fruit = 7
+                self.fruit_list.append([x,y])
                 counter += 1
+        self.get_closest_fruit()
         del row, _, start_dir, counter, x, y
         return self.field
 
@@ -103,7 +113,7 @@ class snakeGame():
         for body in self.SNAKE:
             self.field[body[0]][body[1]] = 1
         self.field[self.SNAKE[0][0]][self.SNAKE[0][1]] = 4
-
+        self.get_closest_fruit()
         return self.field
 
     def update_snake(self):
@@ -117,8 +127,8 @@ class snakeGame():
         head = list(self.SNAKE[0])
         head[0] += self.direction[0]
         head[1] += self.direction[1]
-
-        # If wrapping teleopring
+        self.head = head
+        # If wrapping teleopring TODO: implement
         # if(head[0] == 0):
         #     head[0] = height
         # if(head[0] == height+1):
@@ -227,3 +237,11 @@ class snakeGame():
         elif(action==(4)):
             pass
         return run_into_self
+
+    def get_closest_fruit(self):
+        min_dist = self.max_distance
+        for fruit in self.fruit_list:
+            temp_dist = math.dist(self.head, fruit)
+            if temp_dist < min_dist:
+                self.closest_fruit = fruit
+                self.closest_distance = temp_dist

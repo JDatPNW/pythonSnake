@@ -91,6 +91,15 @@ class DQNAgent:
 
         # Used to count when to update target network with main network's weights
         self.target_update_counter = 0
+        
+        # NOTE!! this was only tested with 1 GPU, might have to be modified if using more than one or if more than 1 are available
+        self.gpu_info = tf.config.list_physical_devices('GPU')
+        if not self.gpu_info:
+            self.has_gpu = False
+            self.gpu_id = "NO_GPU"
+        else:
+            self.has_gpu = True
+            self.gpu_id = int(self.gpu_info[0][0][-1])
 
     def create_model(self):
         """
