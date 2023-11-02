@@ -20,7 +20,7 @@ import os
 # The DQNAgent class is a reinforcement learning agent that uses a Deep Q-Network (DQN) 
 class DQNAgent:
     
-    def __init__(self, max_mem, min_mem, mini_batch, update_target, discount, width, height, actions, verbose):    
+    def __init__(self, max_mem, min_mem, mini_batch, update_target, discount, width, height, actions, verbose, input_dims, useRGBinput):    
         """
         The above code is the initialization function for a DQNAgent class in Python, which sets up various
         parameters and creates the main and target neural network models.
@@ -76,12 +76,17 @@ class DQNAgent:
         self.UPDATE_TARGET_EVERY = update_target  # Terminal states (end of episodes)
         self.WIDTH = width # Width of playable field
         self.HEIGHT = height # Width of playable field
+        self.useRGB = useRGBinput
+        self.rgb_shape = input_dims
         self.ACTION_SPACE = actions # number of possible actions
-        self.SHAPE = (self.WIDTH+2, self.HEIGHT+2, 1) # SHAPE for CNN input. +2s are for the overflow/edge  TODO: if remove overflow are, remove +s TODO: if add images, make the depth variable 
+        if self.useRGB:
+            self.SHAPE = self.rgb_shape
+        else:
+            self.SHAPE = (self.WIDTH+2, self.HEIGHT+2, 1) # SHAPE for CNN input. +2s are for the overflow/edge  TODO: if remove overflow are, remove +s TODO: if add images, make the depth variable 
         self.VERBOSE = verbose # will tf print learning status in console?
         # Main model
         self.model = self.create_model()
-
+        
         # Target network
         self.target_model = self.create_model()
         self.target_model.set_weights(self.model.get_weights())
@@ -157,11 +162,12 @@ class DQNAgent:
 
         # Get a minibatch of random samples from memory replay table
         minibatch = random.sample(self.replay_memory, self.MINIBATCH_SIZE)
-
-        # Get current states from minibatch, then query NN model for Q values
+        # Get current states from minibatch, then query NN model for Q values        
         current_states = np.array([transition[0] for transition in minibatch])/255
-        current_states = np.expand_dims(current_states, -1) # TODO: might be obsolete with  3D images? check if adding images as input 
-
+        
+        if not self.useRGB:
+            current_states = np.expand_dims(current_states, -1) 
+        
         current_qs_list = self.model.predict(current_states)
 
         # Get future states from minibatch, then query NN model for Q values

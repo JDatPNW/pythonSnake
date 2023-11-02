@@ -55,7 +55,7 @@ reward_step = 0 # reward given at every step
 reward_wall = -50 # reward for walking into the wall and dying
 reward_distance = True # whether or not to use the distance reward (recommended to use)
 reward_distance_exponent = 10 # The exponent of by which the distance reward will be calculated, the larger the number, the smaller the reward
-RENDER_EVERY = 10 # every n-th episode the game will be rendered
+RENDER_EVERY = 1 # every n-th episode the game will be rendered
 
 renderVisual = False # uses pygame to draw the game state
 renderText = False # Uses print statements to print the game
@@ -66,16 +66,24 @@ sleepVisual = 0 # time the game will sleep between visual state print renders
 trackGPU = True # can be used when using a GPU - WARNING very slow! Also does measure GPU usage of system! not only process
 GPU_id = 0 # use the ID of the GPU that is being used
 
+input_dims = [WIDTH, HEIGHT, 1] # for non RGB input
+useRGBinput = True # use screenshot of the game as opposed to the minimal input
+
 notes = "New reward function, no penanty for running into self and stepping" # Add notes here about the experiment that might be of use, will be saved to setup file
 
+
 # The code is creating instances of three different classes: `DQNAgent`, `snakeGame`,, `Archiver` and 'Logger'.
-agent = DQNAgent.DQNAgent(REPLAY_MEMORY_SIZE, MIN_REPLAY_MEMORY_SIZE, MINIBATCH_SIZE, UPDATE_TARGET_EVERY, 
-                          DISCOUNT, WIDTH, HEIGHT, ACTION_SPACE_SIZE, TF_VERBOSE)
+render = renderer.Renderer(renderText, renderVisual, WIDTH, HEIGHT, renderText_conv, renderText_num, useRGBinput)
 game = snakeGame.snakeGame(WIDTH, HEIGHT, START_LENGTH, NUM_FRUIT, CAN_PORT, 
                            reward_step, reward_fruit, reward_into_self, reward_wall)
 plot = archiver.Archiver(AGGREGATE_STATS_EVERY, EXPERIMENT_NAME, EPISODES)
 log = logger.Logger()
-render = renderer.Renderer(renderText, renderVisual, WIDTH, HEIGHT, renderText_conv, renderText_num)
+
+if useRGBinput:
+    input_dims = render.Screenshot_Size
+
+agent = DQNAgent.DQNAgent(REPLAY_MEMORY_SIZE, MIN_REPLAY_MEMORY_SIZE, MINIBATCH_SIZE, UPDATE_TARGET_EVERY, 
+                          DISCOUNT, WIDTH, HEIGHT, ACTION_SPACE_SIZE, TF_VERBOSE, input_dims, useRGBinput)
 
 epsilon = 1 # Start Value for Epsilon
 EPSILON_DECAY = 0.9995 # Rate at which Epsilon decays
@@ -111,11 +119,16 @@ def main(episode):
     run_into_self = False
     # Reset environment and get initial state
     dead = False
-    current_state = np.array(list(game.initGame()))
 
-    if not episode % RENDER_EVERY:
+    if useRGBinput:
+        render.InitPygame()
+    elif not episode % RENDER_EVERY:
         if renderVisual:
             render.InitPygame()
+
+    current_state = np.array(list(game.initGame()))
+    if useRGBinput:
+        current_state = np.array(render.getScreenshot(current_state))
 
     # Reset flag and start iterating until episode ends
     start = time.process_time()
@@ -140,6 +153,8 @@ def main(episode):
         cpu, ram, step_time, gpu_load, gpu_mem = 0, 0, 0, 0, 0
 
         new_state = np.array(field) # jd^:
+        if useRGBinput:
+            new_state = np.array(render.getScreenshot(field))
 
         if not episode % RENDER_EVERY:
             if renderText:
@@ -207,7 +222,9 @@ def main(episode):
         epsilon *= EPSILON_DECAY
         epsilon = max(MIN_EPSILON, epsilon)
 
-    if not episode % RENDER_EVERY:
+    if useRGBinput:
+        render.InitPygame()
+    elif not episode % RENDER_EVERY:
         if renderVisual:
             render.quitPygame()
 
