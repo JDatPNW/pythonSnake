@@ -63,11 +63,13 @@ renderText_conv = False # renders text and converts it for better readability
 renderText_num = False # renders text and keeps number format - better for debugging
 sleepText = 0 # time the game will sleep between text state print renders
 sleepVisual = 0 # time the game will sleep between visual state print renders 
+trackCPU_RAM = True # if you want to track CPU usage
 trackGPU = True # can be used when using a GPU - WARNING very slow! Also does measure GPU usage of system! not only process
 GPU_id = 0 # use the ID of the GPU that is being used
 
 input_dims = [WIDTH, HEIGHT, 1] # for non RGB input
 useRGBinput = True # use screenshot of the game as opposed to the minimal input
+stateDepth = 3 # how many images should be stacked for the input? To portrait motion (only for RGB)
 
 notes = "New reward function, no penanty for running into self and stepping" # Add notes here about the experiment that might be of use, will be saved to setup file
 
@@ -81,6 +83,8 @@ log = logger.Logger()
 
 if useRGBinput:
     input_dims = render.Screenshot_Size
+    if stateDepth > 1:
+        input_dims[:0] = [stateDepth]
 
 agent = DQNAgent.DQNAgent(REPLAY_MEMORY_SIZE, MIN_REPLAY_MEMORY_SIZE, MINIBATCH_SIZE, UPDATE_TARGET_EVERY, 
                           DISCOUNT, WIDTH, HEIGHT, ACTION_SPACE_SIZE, TF_VERBOSE, input_dims, useRGBinput)
@@ -119,6 +123,8 @@ def main(episode):
     run_into_self = False
     # Reset environment and get initial state
     dead = False
+    deep_state = []
+    state_ready = False
 
     if useRGBinput:
         render.InitPygame()
@@ -129,7 +135,8 @@ def main(episode):
     current_state = np.array(list(game.initGame()))
     if useRGBinput:
         current_state = np.array(render.getScreenshot(current_state))
-
+        if stateDepth > 1:
+            deep_state.append(current_state)
     # Reset flag and start iterating until episode ends
     start = time.process_time()
     done = False
@@ -140,7 +147,10 @@ def main(episode):
         # This part stays mostly the same, the change is to query a model for Q values
         if np.random.random() > epsilon:
             # Get action from Q table
-            action = np.argmax(agent.get_qs(current_state))
+            if stateDepth > 1 and len(deep_state) < stateDepth:
+                action = np.random.randint(0, ACTION_SPACE_SIZE)
+            else:
+                action = np.argmax(agent.get_qs(current_state))
         else:
             # Get random action
             action = np.random.randint(0, ACTION_SPACE_SIZE)
@@ -153,8 +163,16 @@ def main(episode):
         cpu, ram, step_time, gpu_load, gpu_mem = 0, 0, 0, 0, 0
 
         new_state = np.array(field) # jd^:
+
         if useRGBinput:
             new_state = np.array(render.getScreenshot(field))
+
+        if stateDepth > 1 and step_count > 1:
+            deep_state.append(new_state)
+            if len(deep_state) > stateDepth:
+                deep_state.pop(0)
+                state_ready = True
+            new_state = deep_state
 
         if not episode % RENDER_EVERY:
             if renderText:
@@ -184,8 +202,9 @@ def main(episode):
         episode_reward += reward
 
         # Every step we update replay memory and train main network
-        agent.update_replay_memory((current_state, action, reward, new_state, done))
-        agent.train(done, step_count)
+        if state_ready:
+            agent.update_replay_memory((current_state, action, reward, new_state, done))
+            agent.train(done, step_count)
 
         current_state = new_state
         del new_state
@@ -194,8 +213,9 @@ def main(episode):
         if(step_count >= MAX_STEPS):
             done = True
         
-        cpu = process.cpu_percent() # if bigger than 100 - multiple threads on multiple cores
-        ram = process.memory_percent()
+        if trackCPU_RAM:
+            cpu = process.cpu_percent() # if bigger than 100 - multiple threads on multiple cores
+            ram = process.memory_percent()
     
         if trackGPU and agent.has_gpu:    
             gpu = GPUtil.getGPUs()
@@ -228,7 +248,7 @@ def main(episode):
         if renderVisual:
             render.quitPygame()
 
-    del step_count, reward, episode_reward, action, dead, run_into_self, cause, current_state, ram, cpu, start, step_time
+    del step_count, reward, episode_reward, action, dead, run_into_self, cause, current_state, ram, cpu, start, step_time, deep_state
 
 # Iterate over episodes
 for episode in tqdm(range(1, EPISODES + 1), ascii=True, unit='episodes'):
