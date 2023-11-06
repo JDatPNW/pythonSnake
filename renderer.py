@@ -50,6 +50,9 @@ class Renderer:
 
         self.useRGB = rgb
 
+
+        os.environ['SDL_AUDIODRIVER'] = 'dsp' # use this when running on wsl
+
         if not self.visualRenderer and self.useRGB:
             os.environ["SDL_VIDEODRIVER"] = "dummy"
 
