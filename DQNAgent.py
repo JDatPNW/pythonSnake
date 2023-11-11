@@ -166,12 +166,12 @@ class DQNAgent:
         if not self.useRGB:
             current_states = np.expand_dims(current_states, -1) 
         
-        current_qs_list = self.model.predict(current_states)
+        current_qs_list = self.model.predict(current_states, verbose=self.VERBOSE)
 
         # Get future states from minibatch, then query NN model for Q values
         # When using target network, query it, otherwise main network should be queried
         new_current_states = np.array([transition[3] for transition in minibatch])/255
-        future_qs_list = self.target_model.predict(new_current_states)
+        future_qs_list = self.target_model.predict(new_current_states, verbose=self.VERBOSE)
 
         X = []
         y = []
@@ -220,4 +220,4 @@ class DQNAgent:
         :return: the predicted output of the model for the given state.
         """
         state = np.array(state).reshape(-1, *self.SHAPE)/255
-        return self.model.predict(state)[0]
+        return self.model.predict(state, verbose=self.VERBOSE)[0]
