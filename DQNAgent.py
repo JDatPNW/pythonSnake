@@ -113,16 +113,14 @@ class DQNAgent:
         :return: The function `create_model` returns a compiled Keras model.
         """
         model = Sequential()
-        model.add(Conv2D(16, (3, 3), input_shape=self.SHAPE))  # OBSERVATION_SPACE_VALUES = (10, 10, 3) a 10x10 RGB image.
-        model.add(Activation('relu'))
+        model.add(Conv2D(16, (3, 3), activation='relu', strides=1, padding="SAME", input_shape=self.SHAPE))  # OBSERVATION_SPACE_VALUES = (10, 10, 3) a 10x10 RGB image.
         model.add(Dropout(0.2))
-
-        model.add(Conv2D(16, (3, 3)))
-        model.add(Activation('relu'))
+        model.add(Conv2D(16, (3, 3), activation='relu', strides=1, padding="SAME"))
         model.add(Dropout(0.2))
-
+        # model.add(Conv2D(128, (3, 3), activation='relu',strides=1, padding="SAME"))
+        # model.add(Dropout(0.2))
         model.add(Flatten())  # this converts our 3D feature maps to 1D feature vectors
-        model.add(Dense(64))
+        model.add(Dense(64, activation='relu'))
         model.add(Dense(self.ACTION_SPACE, activation='linear'))  # ACTION_SPACE_SIZE = how many choices (9)
         model.compile(loss="mse", optimizer=Adam(lr=0.001), metrics=['accuracy'])
         

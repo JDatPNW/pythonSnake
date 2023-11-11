@@ -80,7 +80,7 @@ class snakeGame():
         self.LENGTH = self.startingLENGTH
         # If fixed starting point
         # self.SNAKE = [[int(self.HEIGHT/2), int(self.WIDTH/2)]] # TODO: check if they are in the right order or not TODO: use this if no random starting
-        self.SNAKE = [[random.randint(0+4, self.HEIGHT-4), random.randint(0+4, self.WIDTH-4)]]
+        self.SNAKE = [[random.randint(0+5, self.HEIGHT-5), random.randint(0+5, self.WIDTH-5)]]
         self.head = list(self.SNAKE[0])
         row = list([0] * (self.WIDTH+2))
         self.field = []

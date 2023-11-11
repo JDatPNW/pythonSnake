@@ -37,7 +37,7 @@ HEIGHT = 12 # Height of playable field
 START_LENGTH = 3 # Starting Length for snake
 NUM_FRUIT = 1 # NUMBER OF APPLES SPAWNED
 CAN_PORT = False # Can the snake come back from the opposite site when hitting the wall?
-EPISODES = 10_000 # Number of episodes
+EPISODES = 100_000 # Number of episodes
 DISCOUNT = 0.99 # Discount factor / alpha
 REPLAY_MEMORY_SIZE = 50_000  # How many last steps to keep for model training
 MIN_REPLAY_MEMORY_SIZE = 1_000  # Minimum number of steps in a memory to start training
@@ -46,7 +46,7 @@ UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
 AGGREGATE_STATS_EVERY = 100  # episodes used for averaging for plotting
 LOG_EVERY_STEP = True # Log into console every step?
 TF_VERBOSE = 0 # TF print outs
-EXPERIMENT_NAME = "with_Distance" # Name used for files and folders for data
+EXPERIMENT_NAME = "TestingShallowAgain" # Name used for files and folders for data
 MAX_STEPS = 150 # Steps before game will automatically reset (to keep the game of going on forever once the agent becomes very good at playing)
 
 reward_fruit = 25 # reward for picking up a fruit
@@ -68,10 +68,12 @@ trackGPU = True # can be used when using a GPU - WARNING very slow! Also does me
 GPU_id = 0 # use the ID of the GPU that is being used
 
 input_dims = [WIDTH, HEIGHT, 1] # for non RGB input
-useRGBinput = True # use screenshot of the game as opposed to the minimal input
-stateDepth = 3 # how many images should be stacked for the input? To portrait motion (only for RGB)
+useRGBinput = False # use screenshot of the game as opposed to the minimal input
+stateDepth = 1 # NOTE: make sure to set to 1 if not using!!. How many images should be stacked for the input? To portrait motion (only really meant for RGB, but should also work with minimal input)
 
-notes = "New reward function, no penanty for running into self and stepping" # Add notes here about the experiment that might be of use, will be saved to setup file
+mode = "RGB: " + str(useRGBinput) + ", Depth: " + str(stateDepth)
+
+notes = "RGB Deep seems to be having issues, so now non RGB non deep testing again" # Add notes here about the experiment that might be of use, will be saved to setup file
 
 
 # The code is creating instances of three different classes: `DQNAgent`, `snakeGame`,, `Archiver` and 'Logger'.
@@ -109,7 +111,8 @@ plot.saveSetup(ACTION_SPACE_SIZE, WIDTH, HEIGHT, START_LENGTH, NUM_FRUIT, CAN_PO
                REPLAY_MEMORY_SIZE, MIN_REPLAY_MEMORY_SIZE, MINIBATCH_SIZE, UPDATE_TARGET_EVERY, AGGREGATE_STATS_EVERY, 
                LOG_EVERY_STEP, EXPERIMENT_NAME, MAX_STEPS, reward_fruit, reward_into_self, reward_step, reward_wall, epsilon, 
                EPSILON_DECAY, MIN_EPSILON, EPISODES_BEFORE_DECAY, agent.model.get_config(), summary_string, 
-               renderVisual, renderText, renderText_conv, renderText_num, sleepText, sleepVisual, RENDER_EVERY, notes)
+               renderVisual, renderText, renderText_conv, renderText_num, sleepText, sleepVisual, RENDER_EVERY, mode, useRGBinput, stateDepth,
+               trackGPU, trackCPU_RAM, GPU_id, notes)
 
 def main(episode):
     """
@@ -145,15 +148,19 @@ def main(episode):
         global epsilon, EPSILON_DECAY, MIN_EPSILON
 
         # This part stays mostly the same, the change is to query a model for Q values
+        randomChoice = "False"
         if np.random.random() > epsilon:
             # Get action from Q table
             if stateDepth > 1 and len(deep_state) < stateDepth:
                 action = np.random.randint(0, ACTION_SPACE_SIZE)
+                randomChoice = "True - Depth"
             else:
                 action = np.argmax(agent.get_qs(current_state))
         else:
             # Get random action
             action = np.random.randint(0, ACTION_SPACE_SIZE)
+            randomChoice = "True - Epsilon"
+
 
         # jd^: start here v
         run_into_self = game.control(action)
@@ -202,7 +209,7 @@ def main(episode):
         episode_reward += reward
 
         # Every step we update replay memory and train main network
-        if state_ready:
+        if stateDepth == 1 or state_ready:
             agent.update_replay_memory((current_state, action, reward, new_state, done))
             agent.train(done, step_count)
 
@@ -224,7 +231,8 @@ def main(episode):
             gpu_mem = gpu.memoryUtil*100
         step_time = time.process_time() - start
         if(LOG_EVERY_STEP):
-            log.log(episode, step_count, reward, episode_reward, action, (game.direction), (game.head), (game.closest_fruit), dead, epsilon, run_into_self, cause, fruit_counter, game.closest_distance, cpu, ram, step_time, gpu_load, gpu_mem, agent.gpu_id)
+            log.log(episode, step_count, reward, episode_reward, action, (game.direction), (game.head), (game.closest_fruit), dead, epsilon, run_into_self, 
+                    cause, fruit_counter, game.closest_distance, cpu, ram, step_time, gpu_load, gpu_mem, agent.gpu_id, len(agent.replay_memory), len(deep_state), randomChoice, mode)
 
         
     # Append episode reward to a list and log stats (every given number of episodes)
@@ -235,7 +243,8 @@ def main(episode):
         plot.saveData()
         plot.saveModel(agent.target_model)
 
-    log.log(episode, step_count, reward, episode_reward, action, (game.direction), (game.head), (game.closest_fruit), dead, epsilon, run_into_self, cause, fruit_counter, game.closest_distance, cpu, ram, step_time, gpu_load, gpu_mem, agent.gpu_id)
+    log.log(episode, step_count, reward, episode_reward, action, (game.direction), (game.head), (game.closest_fruit), dead, epsilon, run_into_self, 
+            cause, fruit_counter, game.closest_distance, cpu, ram, step_time, gpu_load, gpu_mem, agent.gpu_id, len(agent.replay_memory), len(deep_state), randomChoice, mode)
            
     # Decay epsilon
     if epsilon > MIN_EPSILON and episode > EPISODES_BEFORE_DECAY:

@@ -19,7 +19,7 @@ class Logger():
         """
         pass
 
-    def log(self, episode, step, reward, reward_overall, action, direction, head, fruit, dead, epsilon, ran_into_self, cause, eaten, distance, cpu, ram, step_time, gpu_load, gpu_mem, gpu_id):
+    def log(self, episode, step, reward, reward_overall, action, direction, head, fruit, dead, epsilon, ran_into_self, cause, eaten, distance, cpu, ram, step_time, gpu_load, gpu_mem, gpu_id, batch_depth, state_depth, random, mode):
         """
         The `log` function prints a formatted log message with various information about the episode, step,
         rewards, actions, and other details.
@@ -48,21 +48,21 @@ class Logger():
         print("\n\n")
         print("--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
         print(Fore.RED)
-        print ('| {:<5} | {:<5} | {:<13} | {:<12} | {:<15} | {:<15} | {:<7} | {:<10} | {:<10} | {:<10} | {:<10} |'.format('EP','Step', 'Epsilon', 'Step Reward', 'Fruits Eaten', 'Ep Reward', 'Action', 'Dir', 'Head', 'Fruit', 'Distance'))
+        print ('| {:<5} | {:<5} | {:<13} | {:<12} | {:<15} | {:<15} | {:<17} | {:<10} | {:<10} | {:<10} | {:<10} | {:<10} |'.format('EP','Step', 'Epsilon', 'Step Reward', 'Fruits Eaten', 'Ep Reward', 'Random?', 'Action', 'Dir', 'Head', 'Fruit', 'Distance'))
         print(Style.RESET_ALL)
         print("--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
         print(Fore.YELLOW)
-        print ('| {:<5} | {:<5} | {:<13} | {:<12} | {:<15} | {:<15} | {:<7} | {:<10} | {:<10} | {:<10} | {:<10} |'.format(episode, step, round(epsilon, 10), round(reward, 4), eaten, round(reward_overall, 1), action, str(direction), str(head), str(fruit), round(distance, 5)))
+        print ('| {:<5} | {:<5} | {:<13} | {:<12} | {:<15} | {:<15} | {:<17} | {:<10} | {:<10} | {:<10} | {:<10} | {:<10} |'.format(episode, step, round(epsilon, 10), round(reward, 4), eaten, round(reward_overall, 1), random, action, str(direction), str(head), str(fruit), round(distance, 5)))
         print(Style.RESET_ALL)
         print("--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
 
         print("--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
         print(Fore.RED)
-        print ('| {:<7} | {:<12} | {:<12} | {:<7} | {:<7} | {:<7} | {:<10} | {:<10} | {:<10} | {:<10} |'.format('Dead', 'Cause', 'Into Self', 'PID', 'CPU %', 'RAM %', 'GPU ID', 'GPU Load %', 'GPU Mem %', 'Step Time'))
+        print ('| {:<7} | {:<12} | {:<12} | {:<7} | {:<7} | {:<7} | {:<10} | {:<10} | {:<10} | {:<10} | {:<15} | {:<10} | {:<19} |'.format('Dead', 'Cause', 'Into Self', 'PID', 'CPU %', 'RAM %', 'GPU ID', 'GPU Load %', 'GPU Mem %', 'Step Time', 'ReplayMem Size', 'State Depth', 'Mode'))
         print(Style.RESET_ALL)
         print("--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
         print(Fore.YELLOW)
-        print ('| {:<7} | {:<12} | {:<12} | {:<7} | {:<7} | {:<7} | {:<10} | {:<10} | {:<10} | {:<10} |'.format(dead, cause, ran_into_self, os.getpid(), round(cpu, 5), round(ram, 5), gpu_id, round(gpu_load, 5), round(gpu_mem, 5), round(step_time, 7)))
+        print ('| {:<7} | {:<12} | {:<12} | {:<7} | {:<7} | {:<7} | {:<10} | {:<10} | {:<10} | {:<10} | {:<15} | {:<10} | {:<19} |'.format(dead, cause, ran_into_self, os.getpid(), round(cpu, 5), round(ram, 5), gpu_id, round(gpu_load, 5), round(gpu_mem, 5), round(step_time, 7), batch_depth, state_depth, mode))
         print(Style.RESET_ALL)
         print("--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
 
