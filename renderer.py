@@ -8,7 +8,7 @@ import os
 # display using the Pygame library.
 class Renderer:
   
-    def __init__(self, text, visual, gameLogicWidth, gameLogicHeight, numMode, convMode, rgb):
+    def __init__(self, text, visual, gameLogicWidth, gameLogicHeight, numMode, convMode, rgb, downsample):
         """
         The above function is the initialization function for a Snake game, setting up various variables and
         initializing the Pygame library.
@@ -44,7 +44,7 @@ class Renderer:
         self.WIDTH = 12
         self.HEIGHT = 12
         # Set the HEIGHT and WIDTH of the screen
-        self.downsample = 3
+        self.downsample = downsample
         self.WINDOW_SIZE = [(self.gameLogicWidth + 2)*(self.WIDTH + self.MARGIN), (self.gameLogicHeight + 2)*(self.HEIGHT + self.MARGIN)]
         self.Screenshot_Size = [math.ceil((self.gameLogicWidth + 2)*(self.WIDTH + self.MARGIN)/self.downsample), math.ceil((self.gameLogicHeight + 2)*(self.HEIGHT + self.MARGIN)/self.downsample), 3] # last 3 is for RGB
 
