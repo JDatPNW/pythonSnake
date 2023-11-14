@@ -46,7 +46,7 @@ UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
 AGGREGATE_STATS_EVERY = 100  # episodes used for averaging for plotting
 LOG_EVERY_STEP = True # Log into console every step?
 TF_VERBOSE = 0 # TF print outs
-EXPERIMENT_NAME = "TestingShallowAgain" # Name used for files and folders for data
+EXPERIMENT_NAME = "FixingNearestFruits" # Name used for files and folders for data
 MAX_STEPS = 150 # Steps before game will automatically reset (to keep the game of going on forever once the agent becomes very good at playing)
 
 reward_fruit = 25 # reward for picking up a fruit
@@ -63,23 +63,25 @@ renderText_conv = False # renders text and converts it for better readability
 renderText_num = False # renders text and keeps number format - better for debugging
 sleepText = 0 # time the game will sleep between text state print renders
 sleepVisual = 0 # time the game will sleep between visual state print renders 
-trackCPU_RAM = True # if you want to track CPU usage
-trackGPU = True # can be used when using a GPU - WARNING very slow! Also does measure GPU usage of system! not only process
+trackCPU_RAM = False # if you want to track CPU usage
+trackGPU = False # can be used when using a GPU - WARNING very slow! Also does measure GPU usage of system! not only process
 GPU_id = 0 # use the ID of the GPU that is being used
 
 input_dims = [WIDTH, HEIGHT, 1] # for non RGB input
 useRGBinput = False # use screenshot of the game as opposed to the minimal input
+imageResizeFactor = 5 # Factor by which theoriginal RGB image will be shrunk
+spawnDistanceFromWall = 3 # Distance with which the agent will at least spawn from wall
 stateDepth = 1 # NOTE: make sure to set to 1 if not using!!. How many images should be stacked for the input? To portrait motion (only really meant for RGB, but should also work with minimal input)
 
 mode = "RGB: " + str(useRGBinput) + ", Depth: " + str(stateDepth)
 
-notes = "RGB Deep seems to be having issues, so now non RGB non deep testing again" # Add notes here about the experiment that might be of use, will be saved to setup file
+notes = "Fixed Nearest Fruit being the first fruit at all times" # Add notes here about the experiment that might be of use, will be saved to setup file
 
 
 # The code is creating instances of three different classes: `DQNAgent`, `snakeGame`,, `Archiver` and 'Logger'.
-render = renderer.Renderer(renderText, renderVisual, WIDTH, HEIGHT, renderText_conv, renderText_num, useRGBinput)
+render = renderer.Renderer(renderText, renderVisual, WIDTH, HEIGHT, renderText_conv, renderText_num, useRGBinput, imageResizeFactor)
 game = snakeGame.snakeGame(WIDTH, HEIGHT, START_LENGTH, NUM_FRUIT, CAN_PORT, 
-                           reward_step, reward_fruit, reward_into_self, reward_wall)
+                           reward_step, reward_fruit, reward_into_self, reward_wall, spawnDistanceFromWall)
 plot = archiver.Archiver(AGGREGATE_STATS_EVERY, EXPERIMENT_NAME, EPISODES)
 log = logger.Logger()
 
@@ -112,7 +114,7 @@ plot.saveSetup(ACTION_SPACE_SIZE, WIDTH, HEIGHT, START_LENGTH, NUM_FRUIT, CAN_PO
                LOG_EVERY_STEP, EXPERIMENT_NAME, MAX_STEPS, reward_fruit, reward_into_self, reward_step, reward_wall, epsilon, 
                EPSILON_DECAY, MIN_EPSILON, EPISODES_BEFORE_DECAY, agent.model.get_config(), summary_string, 
                renderVisual, renderText, renderText_conv, renderText_num, sleepText, sleepVisual, RENDER_EVERY, mode, useRGBinput, stateDepth,
-               trackGPU, trackCPU_RAM, GPU_id, notes)
+               trackGPU, trackCPU_RAM, GPU_id, spawnDistanceFromWall, imageResizeFactor, notes)
 
 def main(episode):
     """
@@ -252,7 +254,7 @@ def main(episode):
         epsilon = max(MIN_EPSILON, epsilon)
 
     if useRGBinput:
-        render.InitPygame()
+        render.quitPygame()
     elif not episode % RENDER_EVERY:
         if renderVisual:
             render.quitPygame()
@@ -260,7 +262,7 @@ def main(episode):
     del step_count, reward, episode_reward, action, dead, run_into_self, cause, current_state, ram, cpu, start, step_time, deep_state
 
 # Iterate over episodes
-for episode in tqdm(range(1, EPISODES + 1), ascii=True, unit='episodes'):
+for episode in range(1, EPISODES + 1):
     main(episode)
     tf.keras.backend.clear_session()
     gc.collect()
