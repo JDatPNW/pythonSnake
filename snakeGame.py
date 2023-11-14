@@ -19,7 +19,7 @@ import math
 # field and snake, handling eating, and controlling the snake's direction.
 class snakeGame():
         
-    def __init__(self, width, height, length, fruit_num, can_teleport, reward_step, reward_fruit, reward_into_self, reward_wall):
+    def __init__(self, width, height, length, fruit_num, can_teleport, reward_step, reward_fruit, reward_into_self, reward_wall, spawnBuffer):
         """
         The above function is a Python class constructor that initializes the attributes of a snake game.
         
@@ -55,6 +55,9 @@ class snakeGame():
         self.reward_fruit = reward_fruit
         self.reward_step = reward_step
 
+        self.spawnBuffer = spawnBuffer
+        
+        
     def initGame(self):
         """
         The `initGame` function initializes the game by setting the initial direction, length, and position
@@ -80,7 +83,7 @@ class snakeGame():
         self.LENGTH = self.startingLENGTH
         # If fixed starting point
         # self.SNAKE = [[int(self.HEIGHT/2), int(self.WIDTH/2)]] # TODO: check if they are in the right order or not TODO: use this if no random starting
-        self.SNAKE = [[random.randint(0+5, self.HEIGHT-5), random.randint(0+5, self.WIDTH-5)]]
+        self.SNAKE = [[random.randint(0+self.spawnBuffer, self.HEIGHT-self.spawnBuffer), random.randint(0+self.spawnBuffer, self.WIDTH-self.spawnBuffer)]]
         self.head = list(self.SNAKE[0])
         row = list([0] * (self.WIDTH+2))
         self.field = []
@@ -88,6 +91,7 @@ class snakeGame():
             self.field.append(list(row))
 
         counter = 0
+        self.fruit_list = []
         while(counter < (int(self.num_fruits))):
             x = random.randint(1, self.WIDTH-2)
             y = random.randint(1, self.HEIGHT-2)
@@ -172,13 +176,15 @@ class snakeGame():
         """
         if(self.field[self.SNAKE[0][0]][self.SNAKE[0][1]] == 7):
             self.LENGTH +=1
+            self.fruit_list.remove([self.SNAKE[0][0],self.SNAKE[0][1]])
             counter = 0
             reward = self.reward_fruit
-            while(counter < 1):
+            while(counter < (int(self.num_fruits))):
                 x = random.randint(1,self.WIDTH-2)
                 y = random.randint(1,self.HEIGHT-2)
                 if(self.field[x][y] == 0):
                     self.field[x][y] = 7
+                    self.fruit_list.append([x,y])
                     counter += 1
         else:
             reward = 0
