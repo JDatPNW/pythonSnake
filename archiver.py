@@ -124,7 +124,7 @@ class Archiver():
                   MIN_REPLAY_MEMORY_SIZE, MINIBATCH_SIZE, UPDATE_TARGET_EVERY, AGGREGATE_STATS_EVERY, LOG_EVERY_STEP, EXPERIMENT_NAME, 
                   MAX_STEPS, reward_fruit, reward_into_self, reward_step, reward_wall, epsilon, EPSILON_DECAY, MIN_EPSILON, EPISODES_BEFORE_DECAY, model, summary_string,
                   renderVisual, renderText, renderText_conv, renderText_num, sleepText, sleepVisual, RENDER_EVERY, mode, useRGBinput, stateDepth, 
-                  trackGPU, trackCPU_RAM, GPU_id, spawnDistanceFromWall, imageResizeFactor, notes):
+                  trackGPU, trackCPU_RAM, GPU_id, spawnDistanceFromWall, imageResizeFactor, input_dims, notes):
         '''
         The `saveSetup` function saves the setup and hyperparameters of a model to a file.
         '''
@@ -136,7 +136,7 @@ class Archiver():
         setup += f"{MAX_STEPS=}\n{reward_fruit=}\n{reward_into_self=}\n{reward_step=}\n{reward_wall=}\n{epsilon=}\n{EPSILON_DECAY=}\n"
         setup += f"{MIN_EPSILON=}\n{EPISODES_BEFORE_DECAY=}\n{renderVisual=}\n{renderText=}\n{renderText_conv=}\n{renderText_num=}\n{sleepText=}\n{sleepVisual=}\n{RENDER_EVERY=}\n"
         setup += f"{mode=}\n{useRGBinput=}\n{stateDepth=}\n{trackGPU=}\n{trackCPU_RAM=}\n{GPU_id=}\n{spawnDistanceFromWall=}\n{imageResizeFactor=}\n{notes=}\n"
-        setup += "\nModel Summary=\n" + summary_string + "\n=====MORE DETAILED VERSION BELOW=====\nDetailed Model=\n" + json_model
+        setup += "\nModel Summary=\n" + f"{input_dims=}\n" +  summary_string + "\n=====MORE DETAILED VERSION BELOW=====\nDetailed Model=\n" + json_model
         print(setup, file=open(self.experimentRoot + "/setup.out", 'w'))  # saves hyperparameters to the experiment folder
         del json_model
 

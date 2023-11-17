@@ -37,16 +37,16 @@ HEIGHT = 12 # Height of playable field
 START_LENGTH = 3 # Starting Length for snake
 NUM_FRUIT = 1 # NUMBER OF APPLES SPAWNED
 CAN_PORT = False # Can the snake come back from the opposite site when hitting the wall?
-EPISODES = 100_000 # Number of episodes
+EPISODES = 12_500 # Number of episodes
 DISCOUNT = 0.99 # Discount factor / alpha
 REPLAY_MEMORY_SIZE = 50_000  # How many last steps to keep for model training
 MIN_REPLAY_MEMORY_SIZE = 1_000  # Minimum number of steps in a memory to start training
 MINIBATCH_SIZE = 64  # How many steps (samples) to use for training
 UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
-AGGREGATE_STATS_EVERY = 100  # episodes used for averaging for plotting
+AGGREGATE_STATS_EVERY = 250  # episodes used for averaging for plotting
 LOG_EVERY_STEP = True # Log into console every step?
 TF_VERBOSE = 0 # TF print outs
-EXPERIMENT_NAME = "FixingNearestFruits" # Name used for files and folders for data
+EXPERIMENT_NAME = "RGB_compress6_2deep" # Name used for files and folders for data
 MAX_STEPS = 150 # Steps before game will automatically reset (to keep the game of going on forever once the agent becomes very good at playing)
 
 reward_fruit = 25 # reward for picking up a fruit
@@ -68,10 +68,10 @@ trackGPU = False # can be used when using a GPU - WARNING very slow! Also does m
 GPU_id = 0 # use the ID of the GPU that is being used
 
 input_dims = [WIDTH, HEIGHT, 1] # for non RGB input
-useRGBinput = False # use screenshot of the game as opposed to the minimal input
-imageResizeFactor = 5 # Factor by which theoriginal RGB image will be shrunk
+useRGBinput = True # use screenshot of the game as opposed to the minimal input
+imageResizeFactor = 6 # Factor by which theoriginal RGB image will be shrunk
 spawnDistanceFromWall = 3 # Distance with which the agent will at least spawn from wall
-stateDepth = 1 # NOTE: make sure to set to 1 if not using!!. How many images should be stacked for the input? To portrait motion (only really meant for RGB, but should also work with minimal input)
+stateDepth = 2 # NOTE: make sure to set to 1 if not using!!. How many images should be stacked for the input? To portrait motion (only really meant for RGB, but should also work with minimal input)
 
 mode = "RGB: " + str(useRGBinput) + ", Depth: " + str(stateDepth)
 
@@ -114,7 +114,7 @@ plot.saveSetup(ACTION_SPACE_SIZE, WIDTH, HEIGHT, START_LENGTH, NUM_FRUIT, CAN_PO
                LOG_EVERY_STEP, EXPERIMENT_NAME, MAX_STEPS, reward_fruit, reward_into_self, reward_step, reward_wall, epsilon, 
                EPSILON_DECAY, MIN_EPSILON, EPISODES_BEFORE_DECAY, agent.model.get_config(), summary_string, 
                renderVisual, renderText, renderText_conv, renderText_num, sleepText, sleepVisual, RENDER_EVERY, mode, useRGBinput, stateDepth,
-               trackGPU, trackCPU_RAM, GPU_id, spawnDistanceFromWall, imageResizeFactor, notes)
+               trackGPU, trackCPU_RAM, GPU_id, spawnDistanceFromWall, imageResizeFactor, input_dims, notes)
 
 def main(episode):
     """
