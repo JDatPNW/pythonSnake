@@ -9,7 +9,7 @@
 
 import numpy as np
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Conv2D, MaxPooling2D, Activation, Flatten
+from keras.layers import Dense, Dropout, Conv2D, MaxPooling2D, Activation, Flatten, InputLayer
 from keras.optimizers import Adam
 import tensorflow as tf
 from collections import deque
@@ -113,7 +113,8 @@ class DQNAgent:
         :return: The function `create_model` returns a compiled Keras model.
         """
         model = Sequential()
-        model.add(Conv2D(16, (3, 3), activation='relu', input_shape=self.SHAPE))  # OBSERVATION_SPACE_VALUES = (10, 10, 3) a 10x10 RGB image.
+        model.add(InputLayer(input_shape=self.SHAPE))
+        model.add(Conv2D(16, (3, 3), activation='relu'))  # OBSERVATION_SPACE_VALUES = (10, 10, 3) a 10x10 RGB image.
         model.add(Dropout(0.2))
         model.add(Conv2D(16, (3, 3), activation='relu'))
         model.add(Dropout(0.2))
@@ -125,6 +126,7 @@ class DQNAgent:
         model.add(Dense(self.ACTION_SPACE, activation='linear'))  # ACTION_SPACE_SIZE = how many choices (9)
         model.compile(loss="mse", optimizer=Adam(lr=0.001), metrics=['accuracy'])
         
+        print("Input Shape: ", self.SHAPE)
         model.summary()
         return model
 
