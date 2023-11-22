@@ -62,7 +62,7 @@ class Logger():
         print(Style.RESET_ALL)
         print("--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
         print(Fore.YELLOW)
-        print ('| {:<7} | {:<12} | {:<12} | {:<7} | {:<7} | {:<7} | {:<10} | {:<10} | {:<10} | {:<10} | {:<15} | {:<10} | {:<19} |'.format(dead, cause, ran_into_self, os.getpid(), round(cpu, 5), round(ram, 5), gpu_id, round(gpu_load, 5), round(gpu_mem, 5), round(step_time, 7), batch_depth, state_depth, mode))
+        print ('| {:<7} | {:<12} | {:<12} | {:<7} | {:<7} | {:<7} | {:<10} | {:<10} | {:<10} | {:<10} | {:<15} | {:<10} | {:<19} |'.format(dead, cause, ran_into_self, os.getpid(), round(cpu, 5), round(ram, 5), gpu_id, round(gpu_load, 5), round(gpu_mem, 5), round(step_time, 7), str(batch_depth), state_depth, mode))
         print(Style.RESET_ALL)
         print("--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
 

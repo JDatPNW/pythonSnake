@@ -93,6 +93,7 @@ class DQNAgent:
 
         # An array with last n steps for training
         self.replay_memory = deque(maxlen=self.REPLAY_MEMORY_SIZE)
+        self.replay_memory_good = deque(maxlen=int(self.REPLAY_MEMORY_SIZE))
 
         # Used to count when to update target network with main network's weights
         self.target_update_counter = 0
@@ -132,7 +133,7 @@ class DQNAgent:
 
     # Adds step's data to a memory replay array
     # (observation space, action, reward, new observation space, done)
-    def update_replay_memory(self, transition):
+    def update_replay_memory(self, transition, reward):
         """
         The function `update_replay_memory` appends a transition to the replay memory.
         
@@ -141,7 +142,10 @@ class DQNAgent:
         reward received, and the next state. These components are often represented as a tuple or a
         dictionary
         """
-        self.replay_memory.append(transition)
+        if reward > 0: # TODO make pretty
+            self.replay_memory_good.append(transition)
+        else:
+            self.replay_memory.append(transition)
 
     # Trains main network every step during episode
     def train(self, terminal_state, step):
@@ -158,11 +162,13 @@ class DQNAgent:
         """
 
         # Start training only if certain number of samples is already saved
-        if len(self.replay_memory) < self.MIN_REPLAY_MEMORY_SIZE:
+        if len(self.replay_memory) < self.MIN_REPLAY_MEMORY_SIZE or len(self.replay_memory_good) < int(self.MIN_REPLAY_MEMORY_SIZE): # TODO: make pretty
             return
 
         # Get a minibatch of random samples from memory replay table
-        minibatch = random.sample(self.replay_memory, self.MINIBATCH_SIZE)
+        minibatch = random.sample(self.replay_memory, int(self.MINIBATCH_SIZE*0.2)) # TODO: make pretty
+        minibatch += random.sample(self.replay_memory_good, int(self.MINIBATCH_SIZE*0.8)) # TODO: make pretty
+
         # Get current states from minibatch, then query NN model for Q values        
         current_states = np.array([transition[0] for transition in minibatch])/255
         

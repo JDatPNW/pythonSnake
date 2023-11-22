@@ -37,16 +37,16 @@ HEIGHT = 12 # Height of playable field
 START_LENGTH = 3 # Starting Length for snake
 NUM_FRUIT = 1 # NUMBER OF APPLES SPAWNED
 CAN_PORT = False # Can the snake come back from the opposite site when hitting the wall?
-EPISODES = 12_500 # Number of episodes
+EPISODES = 50_000 # Number of episodes
 DISCOUNT = 0.99 # Discount factor / alpha
 REPLAY_MEMORY_SIZE = 50_000  # How many last steps to keep for model training
-MIN_REPLAY_MEMORY_SIZE = 1_000  # Minimum number of steps in a memory to start training
+MIN_REPLAY_MEMORY_SIZE = 10_000  # Minimum number of steps in a memory to start training
 MINIBATCH_SIZE = 64  # How many steps (samples) to use for training
-UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
+UPDATE_TARGET_EVERY = 50  # Terminal states (end of episodes)
 AGGREGATE_STATS_EVERY = 250  # episodes used for averaging for plotting
 LOG_EVERY_STEP = True # Log into console every step?
 TF_VERBOSE = 0 # TF print outs
-EXPERIMENT_NAME = "RGB_compress6_2deep" # Name used for files and folders for data
+EXPERIMENT_NAME = "RGB_compress6_1deep" # Name used for files and folders for data
 MAX_STEPS = 150 # Steps before game will automatically reset (to keep the game of going on forever once the agent becomes very good at playing)
 
 reward_fruit = 25 # reward for picking up a fruit
@@ -71,7 +71,7 @@ input_dims = [WIDTH, HEIGHT, 1] # for non RGB input
 useRGBinput = True # use screenshot of the game as opposed to the minimal input
 imageResizeFactor = 6 # Factor by which theoriginal RGB image will be shrunk
 spawnDistanceFromWall = 3 # Distance with which the agent will at least spawn from wall
-stateDepth = 2 # NOTE: make sure to set to 1 if not using!!. How many images should be stacked for the input? To portrait motion (only really meant for RGB, but should also work with minimal input)
+stateDepth = 1 # NOTE: make sure to set to 1 if not using!!. How many images should be stacked for the input? To portrait motion (only really meant for RGB, but should also work with minimal input)
 
 mode = "RGB: " + str(useRGBinput) + ", Depth: " + str(stateDepth)
 
@@ -94,9 +94,9 @@ agent = DQNAgent.DQNAgent(REPLAY_MEMORY_SIZE, MIN_REPLAY_MEMORY_SIZE, MINIBATCH_
                           DISCOUNT, WIDTH, HEIGHT, ACTION_SPACE_SIZE, TF_VERBOSE, input_dims, useRGBinput)
 
 epsilon = 1 # Start Value for Epsilon
-EPSILON_DECAY = 0.9995 # Rate at which Epsilon decays
+EPSILON_DECAY = 0.9999 # Rate at which Epsilon decays
 MIN_EPSILON = 0.001 # Value where that decay stops
-EPISODES_BEFORE_DECAY = 31 # episodes before epsilon dacay will start
+EPISODES_BEFORE_DECAY = 2000 # episodes before epsilon dacay will start
 
 stream = io.StringIO()
 agent.target_model.summary(print_fn=lambda x: stream.write(x + '\n'))
@@ -130,6 +130,7 @@ def main(episode):
     dead = False
     deep_state = []
     state_ready = False
+    prev_dist = 0
 
     if useRGBinput:
         render.InitPygame()
@@ -145,6 +146,7 @@ def main(episode):
     # Reset flag and start iterating until episode ends
     start = time.process_time()
     done = False
+    
     while not done:
 
         global epsilon, EPSILON_DECAY, MIN_EPSILON
@@ -205,14 +207,20 @@ def main(episode):
             reward = reward_step
         
         if reward_distance:
-            reward += math.pow((game.max_distance - game.closest_distance) / game.max_distance, reward_distance_exponent)
+            if step_count == 1:
+                pass
+            else:
+                # reward += math.pow((game.max_distance - game.closest_distance) / game.max_distance, reward_distance_exponent) # NOTE OLD Function
+                reward += (prev_dist - game.closest_distance) / reward_distance_exponent
+            prev_dist = game.closest_distance
 
         # Transform new continous state to new discrete state and count reward
         episode_reward += reward
 
         # Every step we update replay memory and train main network
         if stateDepth == 1 or state_ready:
-            agent.update_replay_memory((current_state, action, reward, new_state, done))
+            agent.update_replay_memory((current_state, action, reward, new_state, done), reward)
+            # if not step_count % 4: # TODO make pretty
             agent.train(done, step_count)
 
         current_state = new_state
@@ -233,8 +241,8 @@ def main(episode):
             gpu_mem = gpu.memoryUtil*100
         step_time = time.process_time() - start
         if(LOG_EVERY_STEP):
-            log.log(episode, step_count, reward, episode_reward, action, (game.direction), (game.head), (game.closest_fruit), dead, epsilon, run_into_self, 
-                    cause, fruit_counter, game.closest_distance, cpu, ram, step_time, gpu_load, gpu_mem, agent.gpu_id, len(agent.replay_memory), len(deep_state), randomChoice, mode)
+            log.log(episode, step_count-1, reward, episode_reward, action, (game.direction), (game.head), (game.closest_fruit), dead, epsilon, run_into_self, 
+                    cause, fruit_counter, game.closest_distance, cpu, ram, step_time, gpu_load, gpu_mem, agent.gpu_id, [len(agent.replay_memory), len(agent.replay_memory_good)], len(deep_state), randomChoice, mode)
 
         
     # Append episode reward to a list and log stats (every given number of episodes)
@@ -246,7 +254,7 @@ def main(episode):
         plot.saveModel(agent.target_model)
 
     log.log(episode, step_count, reward, episode_reward, action, (game.direction), (game.head), (game.closest_fruit), dead, epsilon, run_into_self, 
-            cause, fruit_counter, game.closest_distance, cpu, ram, step_time, gpu_load, gpu_mem, agent.gpu_id, len(agent.replay_memory), len(deep_state), randomChoice, mode)
+            cause, fruit_counter, game.closest_distance, cpu, ram, step_time, gpu_load, gpu_mem, agent.gpu_id, [len(agent.replay_memory), len(agent.replay_memory_good)], len(deep_state), randomChoice, mode)
            
     # Decay epsilon
     if epsilon > MIN_EPSILON and episode > EPISODES_BEFORE_DECAY:

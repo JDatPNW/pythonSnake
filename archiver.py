@@ -52,6 +52,7 @@ class Archiver():
         self.average_reward_list = []
         self.average_step_list = []
         self.average_fruit_list = []
+        self.average_epsilon_list = []
         self.min_reward_list = []
         self.max_reward_list = []
         self.num_experiments = num_experiments
@@ -107,6 +108,7 @@ class Archiver():
         average_gpu_load = sum(self.gpu_load[-self.AGGREGATE_STATS_EVERY:])/len(self.gpu_load[-self.AGGREGATE_STATS_EVERY:])
         average_gpu_mem = sum(self.gpu_mem[-self.AGGREGATE_STATS_EVERY:])/len(self.gpu_mem[-self.AGGREGATE_STATS_EVERY:])
         average_step_time = sum(self.step_time[-self.AGGREGATE_STATS_EVERY:])/len(self.step_time[-self.AGGREGATE_STATS_EVERY:])
+        average_epsilon = sum(self.epsilon_over_time[-self.AGGREGATE_STATS_EVERY:])/len(self.epsilon_over_time[-self.AGGREGATE_STATS_EVERY:])
 
         self.average_reward_list.append(average_reward)
         self.average_step_list.append(average_step)
@@ -118,7 +120,9 @@ class Archiver():
         self.average_gpu_load.append(average_gpu_load)
         self.average_gpu_mem.append(average_gpu_mem)
         self.average_step_time.append(average_step_time)
-        del average_reward, average_step, average_fruits, min_reward, max_reward, average_cpu, average_ram, average_step_time, average_gpu_load, average_gpu_mem
+        self.average_epsilon_list.append(average_epsilon)
+        
+        del average_reward, average_step, average_fruits, min_reward, max_reward, average_cpu, average_ram, average_step_time, average_gpu_load, average_gpu_mem, average_epsilon
 
     def saveSetup(self,ACTION_SPACE_SIZE, WIDTH, HEIGHT, START_LENGTH, NUM_FRUIT, CAN_PORT, EPISODES, DISCOUNT, REPLAY_MEMORY_SIZE, 
                   MIN_REPLAY_MEMORY_SIZE, MINIBATCH_SIZE, UPDATE_TARGET_EVERY, AGGREGATE_STATS_EVERY, LOG_EVERY_STEP, EXPERIMENT_NAME, 
@@ -162,7 +166,8 @@ class Archiver():
             "average_ram": self.average_ram,
             "average_gpu_load": self.average_gpu_load,
             "average_gpu_mem": self.average_gpu_mem,
-            "average_step_time": self.average_step_time
+            "average_step_time": self.average_step_time,
+            "average_epsilon_list": self.average_epsilon_list
             }
 
         np.save(self.experimentRoot + "/data/" + self.NAME + str(len(self.average_reward_list)) + ".npy", movingData)
@@ -178,7 +183,7 @@ class Archiver():
 
         
         ax1.plot(self.average_reward_list, label = "average Reward")
-        # plt.plot(epsilon_over_time * 100, label = "epsilon percentage")
+        ax1.plot([100 * x for  x in self.average_epsilon_list], label = "epsilon percentage", color="#6B6B6B")
         ax1.plot(self.min_reward_list, label = "min. Reward")
         ax1.plot(self.max_reward_list, label = "max. Reward")
         ax1.plot(self.average_step_list, label = "average Steps")
