@@ -174,7 +174,7 @@ class Renderer:
                 elif field[row][column] == 1:
                     color = self.RED
                 elif field[row][column] == 4:
-                    color = self.YELLOW # Yellow if the head us supposed to look different | Red if should be same
+                    color = self.RED # Yellow if the head us supposed to look different | Red if should be same
                 elif row == 0 or row == (self.gameLogicHeight + 1) or column == 0 or column == (self.gameLogicWidth + 1):
                     color = self.GREY
 

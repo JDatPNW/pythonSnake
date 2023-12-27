@@ -29,6 +29,8 @@ import archiver
 import logger
 import renderer
 
+# NOTE NOTE NOTE TODO: make updates to all new functions to use parameters (no magic numbers) and to be tracked by archiver and logger
+
 # These are the parameters and settings used in the snake game and the DQN agent. Here is a brief
 # explanation of each parameter:
 ACTION_SPACE_SIZE = 4 # Number possible actions
@@ -46,16 +48,21 @@ UPDATE_TARGET_EVERY = 50  # Terminal states (end of episodes)
 AGGREGATE_STATS_EVERY = 250  # episodes used for averaging for plotting
 LOG_EVERY_STEP = True # Log into console every step?
 TF_VERBOSE = 0 # TF print outs
-EXPERIMENT_NAME = "RGB_compress6_1deep" # Name used for files and folders for data
+EXPERIMENT_NAME = "Higher_Reward_again_Deep" # Name used for files and folders for data
 MAX_STEPS = 150 # Steps before game will automatically reset (to keep the game of going on forever once the agent becomes very good at playing)
 
-reward_fruit = 25 # reward for picking up a fruit
+reward_fruit = 10 # reward for picking up a fruit
 reward_into_self = 0 # reward for trying to run into oneself (180 turn)
 reward_step = 0 # reward given at every step
-reward_wall = -50 # reward for walking into the wall and dying
+reward_wall = -10 # reward for walking into the wall and dying
 reward_distance = True # whether or not to use the distance reward (recommended to use)
 reward_distance_exponent = 10 # The exponent of by which the distance reward will be calculated, the larger the number, the smaller the reward
 RENDER_EVERY = 1 # every n-th episode the game will be rendered
+
+epsilon = 1 # Start Value for Epsilon
+EPSILON_DECAY = 0.9995 # Rate at which Epsilon decays
+MIN_EPSILON = 0.001 # Value where that decay stops
+EPISODES_BEFORE_DECAY = 2000 # episodes before epsilon dacay will start
 
 renderVisual = False # uses pygame to draw the game state
 renderText = False # Uses print statements to print the game
@@ -71,11 +78,16 @@ input_dims = [WIDTH, HEIGHT, 1] # for non RGB input
 useRGBinput = True # use screenshot of the game as opposed to the minimal input
 imageResizeFactor = 6 # Factor by which theoriginal RGB image will be shrunk
 spawnDistanceFromWall = 3 # Distance with which the agent will at least spawn from wall
-stateDepth = 1 # NOTE: make sure to set to 1 if not using!!. How many images should be stacked for the input? To portrait motion (only really meant for RGB, but should also work with minimal input)
+stateDepth = 2 # NOTE: make sure to set to 1 if not using!!. How many images should be stacked for the input? To portrait motion (only really meant for RGB, but should also work with minimal input)
+
+good_mem_size_muliplier = 0.5
+good_mem_min_multiplier = 0.33
+good_mem_split = 0.5
+good_mem_threshold = 0.05 
 
 mode = "RGB: " + str(useRGBinput) + ", Depth: " + str(stateDepth)
 
-notes = "Fixed Nearest Fruit being the first fruit at all times" # Add notes here about the experiment that might be of use, will be saved to setup file
+notes = "Changed snake to be all single color and using depth 2 " # Add notes here about the experiment that might be of use, will be saved to setup file
 
 
 # The code is creating instances of three different classes: `DQNAgent`, `snakeGame`,, `Archiver` and 'Logger'.
@@ -91,12 +103,8 @@ if useRGBinput:
         input_dims[:0] = [stateDepth]
 
 agent = DQNAgent.DQNAgent(REPLAY_MEMORY_SIZE, MIN_REPLAY_MEMORY_SIZE, MINIBATCH_SIZE, UPDATE_TARGET_EVERY, 
-                          DISCOUNT, WIDTH, HEIGHT, ACTION_SPACE_SIZE, TF_VERBOSE, input_dims, useRGBinput)
-
-epsilon = 1 # Start Value for Epsilon
-EPSILON_DECAY = 0.9999 # Rate at which Epsilon decays
-MIN_EPSILON = 0.001 # Value where that decay stops
-EPISODES_BEFORE_DECAY = 2000 # episodes before epsilon dacay will start
+                          DISCOUNT, WIDTH, HEIGHT, ACTION_SPACE_SIZE, TF_VERBOSE, input_dims, useRGBinput,
+                          good_mem_size_muliplier, good_mem_min_multiplier, good_mem_split, good_mem_threshold)
 
 stream = io.StringIO()
 agent.target_model.summary(print_fn=lambda x: stream.write(x + '\n'))
@@ -114,7 +122,8 @@ plot.saveSetup(ACTION_SPACE_SIZE, WIDTH, HEIGHT, START_LENGTH, NUM_FRUIT, CAN_PO
                LOG_EVERY_STEP, EXPERIMENT_NAME, MAX_STEPS, reward_fruit, reward_into_self, reward_step, reward_wall, epsilon, 
                EPSILON_DECAY, MIN_EPSILON, EPISODES_BEFORE_DECAY, agent.model.get_config(), summary_string, 
                renderVisual, renderText, renderText_conv, renderText_num, sleepText, sleepVisual, RENDER_EVERY, mode, useRGBinput, stateDepth,
-               trackGPU, trackCPU_RAM, GPU_id, spawnDistanceFromWall, imageResizeFactor, input_dims, notes)
+               trackGPU, trackCPU_RAM, GPU_id, spawnDistanceFromWall, imageResizeFactor, input_dims,
+               good_mem_size_muliplier, good_mem_min_multiplier, good_mem_split, good_mem_threshold, notes)
 
 def main(episode):
     """

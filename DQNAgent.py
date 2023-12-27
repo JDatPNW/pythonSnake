@@ -20,7 +20,8 @@ import os
 # The DQNAgent class is a reinforcement learning agent that uses a Deep Q-Network (DQN) 
 class DQNAgent:
     
-    def __init__(self, max_mem, min_mem, mini_batch, update_target, discount, width, height, actions, verbose, input_dims, useRGBinput):    
+    def __init__(self, max_mem, min_mem, mini_batch, update_target, discount, width, height, actions, verbose, input_dims, 
+                 useRGBinput, good_mem_size_muliplier, good_mem_min_multiplier, good_mem_split, good_mem_threshold):    
         """
         The above code is the initialization function for a DQNAgent class in Python, which sets up various
         parameters and creates the main and target neural network models.
@@ -91,9 +92,14 @@ class DQNAgent:
         self.target_model = self.create_model()
         self.target_model.set_weights(self.model.get_weights())
 
+        self.good_mem_size_muliplier = good_mem_size_muliplier
+        self.good_mem_min_multiplier = good_mem_min_multiplier
+        self.good_mem_split = good_mem_split
+        self.good_mem_threshold = good_mem_threshold
+        
         # An array with last n steps for training
         self.replay_memory = deque(maxlen=self.REPLAY_MEMORY_SIZE)
-        self.replay_memory_good = deque(maxlen=int(self.REPLAY_MEMORY_SIZE))
+        self.replay_memory_good = deque(maxlen=int(self.REPLAY_MEMORY_SIZE*good_mem_size_muliplier))
 
         # Used to count when to update target network with main network's weights
         self.target_update_counter = 0
@@ -142,7 +148,7 @@ class DQNAgent:
         reward received, and the next state. These components are often represented as a tuple or a
         dictionary
         """
-        if reward > 0: # TODO make pretty
+        if reward > 0.05: # TODO make pretty
             self.replay_memory_good.append(transition)
         else:
             self.replay_memory.append(transition)
@@ -162,12 +168,12 @@ class DQNAgent:
         """
 
         # Start training only if certain number of samples is already saved
-        if len(self.replay_memory) < self.MIN_REPLAY_MEMORY_SIZE or len(self.replay_memory_good) < int(self.MIN_REPLAY_MEMORY_SIZE): # TODO: make pretty
+        if len(self.replay_memory) < self.MIN_REPLAY_MEMORY_SIZE or len(self.replay_memory_good) < int(self.MIN_REPLAY_MEMORY_SIZE*self.good_mem_min_multiplier): # TODO: make pretty
             return
 
         # Get a minibatch of random samples from memory replay table
-        minibatch = random.sample(self.replay_memory, int(self.MINIBATCH_SIZE*0.2)) # TODO: make pretty
-        minibatch += random.sample(self.replay_memory_good, int(self.MINIBATCH_SIZE*0.8)) # TODO: make pretty
+        minibatch = random.sample(self.replay_memory, int(self.MINIBATCH_SIZE*(1-self.good_mem_split))) # TODO: make pretty
+        minibatch += random.sample(self.replay_memory_good, int(self.MINIBATCH_SIZE*self.good_mem_split)) # TODO: make pretty
 
         # Get current states from minibatch, then query NN model for Q values        
         current_states = np.array([transition[0] for transition in minibatch])/255
