@@ -42,19 +42,19 @@ CAN_PORT = False # Can the snake come back from the opposite site when hitting t
 EPISODES = 50_000 # Number of episodes
 DISCOUNT = 0.99 # Discount factor / alpha
 REPLAY_MEMORY_SIZE = 50_000  # How many last steps to keep for model training
-MIN_REPLAY_MEMORY_SIZE = 10_000  # Minimum number of steps in a memory to start training
+MIN_REPLAY_MEMORY_SIZE = 1_000  # Minimum number of steps in a memory to start training
 MINIBATCH_SIZE = 64  # How many steps (samples) to use for training
-UPDATE_TARGET_EVERY = 50  # Terminal states (end of episodes)
-AGGREGATE_STATS_EVERY = 250  # episodes used for averaging for plotting
+UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
+AGGREGATE_STATS_EVERY = 100  # episodes used for averaging for plotting
 LOG_EVERY_STEP = True # Log into console every step?
 TF_VERBOSE = 0 # TF print outs
-EXPERIMENT_NAME = "Higher_Reward_again_Deep" # Name used for files and folders for data
+EXPERIMENT_NAME = "same_as_my_computer" # Name used for files and folders for data
 MAX_STEPS = 150 # Steps before game will automatically reset (to keep the game of going on forever once the agent becomes very good at playing)
 
-reward_fruit = 10 # reward for picking up a fruit
+reward_fruit = 25 # reward for picking up a fruit
 reward_into_self = 0 # reward for trying to run into oneself (180 turn)
 reward_step = 0 # reward given at every step
-reward_wall = -10 # reward for walking into the wall and dying
+reward_wall = -50 # reward for walking into the wall and dying
 reward_distance = True # whether or not to use the distance reward (recommended to use)
 reward_distance_exponent = 10 # The exponent of by which the distance reward will be calculated, the larger the number, the smaller the reward
 RENDER_EVERY = 1 # every n-th episode the game will be rendered
@@ -62,7 +62,7 @@ RENDER_EVERY = 1 # every n-th episode the game will be rendered
 epsilon = 1 # Start Value for Epsilon
 EPSILON_DECAY = 0.9995 # Rate at which Epsilon decays
 MIN_EPSILON = 0.001 # Value where that decay stops
-EPISODES_BEFORE_DECAY = 2000 # episodes before epsilon dacay will start
+EPISODES_BEFORE_DECAY = 31 # episodes before epsilon dacay will start
 
 renderVisual = False # uses pygame to draw the game state
 renderText = False # Uses print statements to print the game
@@ -75,15 +75,16 @@ trackGPU = False # can be used when using a GPU - WARNING very slow! Also does m
 GPU_id = 0 # use the ID of the GPU that is being used
 
 input_dims = [WIDTH, HEIGHT, 1] # for non RGB input
-useRGBinput = True # use screenshot of the game as opposed to the minimal input
+useRGBinput = False # use screenshot of the game as opposed to the minimal input
 imageResizeFactor = 6 # Factor by which theoriginal RGB image will be shrunk
 spawnDistanceFromWall = 3 # Distance with which the agent will at least spawn from wall
-stateDepth = 2 # NOTE: make sure to set to 1 if not using!!. How many images should be stacked for the input? To portrait motion (only really meant for RGB, but should also work with minimal input)
+stateDepth = 1 # NOTE: make sure to set to 1 if not using!!. How many images should be stacked for the input? To portrait motion (only really meant for RGB, but should also work with minimal input)
 
-good_mem_size_muliplier = 0.5
-good_mem_min_multiplier = 0.33
-good_mem_split = 0.5
-good_mem_threshold = 0.05 
+good_mem_size_muliplier = 0#.5
+good_mem_min_multiplier = 0#.33
+good_mem_split = 0#.5
+good_mem_threshold = 0#.05 
+use_good_mem = False
 
 mode = "RGB: " + str(useRGBinput) + ", Depth: " + str(stateDepth)
 
@@ -104,7 +105,7 @@ if useRGBinput:
 
 agent = DQNAgent.DQNAgent(REPLAY_MEMORY_SIZE, MIN_REPLAY_MEMORY_SIZE, MINIBATCH_SIZE, UPDATE_TARGET_EVERY, 
                           DISCOUNT, WIDTH, HEIGHT, ACTION_SPACE_SIZE, TF_VERBOSE, input_dims, useRGBinput,
-                          good_mem_size_muliplier, good_mem_min_multiplier, good_mem_split, good_mem_threshold)
+                          good_mem_size_muliplier, good_mem_min_multiplier, good_mem_split, good_mem_threshold, use_good_mem)
 
 stream = io.StringIO()
 agent.target_model.summary(print_fn=lambda x: stream.write(x + '\n'))

@@ -21,7 +21,7 @@ import os
 class DQNAgent:
     
     def __init__(self, max_mem, min_mem, mini_batch, update_target, discount, width, height, actions, verbose, input_dims, 
-                 useRGBinput, good_mem_size_muliplier, good_mem_min_multiplier, good_mem_split, good_mem_threshold):    
+                 useRGBinput, good_mem_size_muliplier, good_mem_min_multiplier, good_mem_split, good_mem_threshold, use_good_mem):    
         """
         The above code is the initialization function for a DQNAgent class in Python, which sets up various
         parameters and creates the main and target neural network models.
@@ -96,6 +96,7 @@ class DQNAgent:
         self.good_mem_min_multiplier = good_mem_min_multiplier
         self.good_mem_split = good_mem_split
         self.good_mem_threshold = good_mem_threshold
+        self.use_good_mem = use_good_mem
         
         # An array with last n steps for training
         self.replay_memory = deque(maxlen=self.REPLAY_MEMORY_SIZE)
@@ -148,7 +149,7 @@ class DQNAgent:
         reward received, and the next state. These components are often represented as a tuple or a
         dictionary
         """
-        if reward > self.good_mem_threshold: # TODO make pretty
+        if reward > self.good_mem_threshold and self.use_good_mem: # TODO make pretty
             self.replay_memory_good.append(transition)
         else:
             self.replay_memory.append(transition)
