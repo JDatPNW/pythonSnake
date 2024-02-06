@@ -148,7 +148,7 @@ class DQNAgent:
         reward received, and the next state. These components are often represented as a tuple or a
         dictionary
         """
-        if reward > 0.05: # TODO make pretty
+        if reward > self.good_mem_threshold: # TODO make pretty
             self.replay_memory_good.append(transition)
         else:
             self.replay_memory.append(transition)
