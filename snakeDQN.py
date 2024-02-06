@@ -263,7 +263,7 @@ def main(episode):
         plot.saveData()
         plot.saveModel(agent.target_model)
 
-    log.log(episode, step_count, reward, episode_reward, action, (game.direction), (game.head), (game.closest_fruit), dead, epsilon, run_into_self, 
+    log.log(episode, step_count-1, reward, episode_reward, action, (game.direction), (game.head), (game.closest_fruit), dead, epsilon, run_into_self, 
             cause, fruit_counter, game.closest_distance, cpu, ram, step_time, gpu_load, gpu_mem, agent.gpu_id, [len(agent.replay_memory), use_good_mem, len(agent.replay_memory_good)], len(deep_state), randomChoice, mode)
            
     # Decay epsilon
