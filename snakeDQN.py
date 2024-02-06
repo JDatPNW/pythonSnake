@@ -124,7 +124,7 @@ plot.saveSetup(ACTION_SPACE_SIZE, WIDTH, HEIGHT, START_LENGTH, NUM_FRUIT, CAN_PO
                EPSILON_DECAY, MIN_EPSILON, EPISODES_BEFORE_DECAY, agent.model.get_config(), summary_string, 
                renderVisual, renderText, renderText_conv, renderText_num, sleepText, sleepVisual, RENDER_EVERY, mode, useRGBinput, stateDepth,
                trackGPU, trackCPU_RAM, GPU_id, spawnDistanceFromWall, imageResizeFactor, input_dims,
-               good_mem_size_muliplier, good_mem_min_multiplier, good_mem_split, good_mem_threshold, notes)
+               good_mem_size_muliplier, good_mem_min_multiplier, good_mem_split, good_mem_threshold, use_good_mem, notes)
 
 def main(episode):
     """
@@ -252,7 +252,7 @@ def main(episode):
         step_time = time.process_time() - start
         if(LOG_EVERY_STEP):
             log.log(episode, step_count-1, reward, episode_reward, action, (game.direction), (game.head), (game.closest_fruit), dead, epsilon, run_into_self, 
-                    cause, fruit_counter, game.closest_distance, cpu, ram, step_time, gpu_load, gpu_mem, agent.gpu_id, [len(agent.replay_memory), len(agent.replay_memory_good)], len(deep_state), randomChoice, mode)
+                    cause, fruit_counter, game.closest_distance, cpu, ram, step_time, gpu_load, gpu_mem, agent.gpu_id, [len(agent.replay_memory), use_good_mem, len(agent.replay_memory_good)], len(deep_state), randomChoice, mode)
 
         
     # Append episode reward to a list and log stats (every given number of episodes)
@@ -264,7 +264,7 @@ def main(episode):
         plot.saveModel(agent.target_model)
 
     log.log(episode, step_count, reward, episode_reward, action, (game.direction), (game.head), (game.closest_fruit), dead, epsilon, run_into_self, 
-            cause, fruit_counter, game.closest_distance, cpu, ram, step_time, gpu_load, gpu_mem, agent.gpu_id, [len(agent.replay_memory), len(agent.replay_memory_good)], len(deep_state), randomChoice, mode)
+            cause, fruit_counter, game.closest_distance, cpu, ram, step_time, gpu_load, gpu_mem, agent.gpu_id, [len(agent.replay_memory), use_good_mem, len(agent.replay_memory_good)], len(deep_state), randomChoice, mode)
            
     # Decay epsilon
     if epsilon > MIN_EPSILON and episode > EPISODES_BEFORE_DECAY:
