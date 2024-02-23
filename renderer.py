@@ -8,7 +8,7 @@ import os
 # display using the Pygame library.
 class Renderer:
   
-    def __init__(self, text, visual, gameLogicWidth, gameLogicHeight, numMode, convMode, rgb, downsample):
+    def __init__(self, text, visual, gameLogicWidth, gameLogicHeight, numMode, convMode, rgb, downsample, useDifferentColorHead):
         """
         The above function is the initialization function for a Snake game, setting up various variables and
         initializing the Pygame library.
@@ -50,6 +50,12 @@ class Renderer:
 
         self.useRGB = rgb
 
+        self.useDifferentColorHead = useDifferentColorHead
+        
+        if useDifferentColorHead:
+            self.headColor = self.YELLOW
+        else:
+            self.headColor = self.RED
 
         os.environ['SDL_AUDIODRIVER'] = 'dsp' # use this when running on wsl
 
@@ -174,7 +180,7 @@ class Renderer:
                 elif field[row][column] == 1:
                     color = self.RED
                 elif field[row][column] == 4:
-                    color = self.RED # Yellow if the head us supposed to look different | Red if should be same
+                    color = self.headColor # Yellow if the head us supposed to look different | Red if should be same
                 elif row == 0 or row == (self.gameLogicHeight + 1) or column == 0 or column == (self.gameLogicWidth + 1):
                     color = self.GREY
 

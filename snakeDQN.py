@@ -80,11 +80,11 @@ imageResizeFactor = 6 # Factor by which theoriginal RGB image will be shrunk
 spawnDistanceFromWall = 3 # Distance with which the agent will at least spawn from wall
 stateDepth = 1 # NOTE: make sure to set to 1 if not using!!. How many images should be stacked for the input? To portrait motion (only really meant for RGB, but should also work with minimal input)
 
-good_mem_size_muliplier = 0#.5
-good_mem_min_multiplier = 0#.33
-good_mem_split = 0#.5
-good_mem_threshold = 0#.05 
-use_good_mem = False
+good_mem_size_muliplier = 0.5
+good_mem_min_multiplier = 0.33
+good_mem_split = 0.5
+good_mem_threshold = 0.05 
+use_good_mem = True
 
 mode = "RGB: " + str(useRGBinput) + ", Depth: " + str(stateDepth)
 
