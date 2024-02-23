@@ -79,6 +79,7 @@ useRGBinput = False # use screenshot of the game as opposed to the minimal input
 imageResizeFactor = 6 # Factor by which theoriginal RGB image will be shrunk
 spawnDistanceFromWall = 3 # Distance with which the agent will at least spawn from wall
 stateDepth = 1 # NOTE: make sure to set to 1 if not using!!. How many images should be stacked for the input? To portrait motion (only really meant for RGB, but should also work with minimal input)
+useDifferentColorHead = True
 
 good_mem_size_muliplier = 0.5
 good_mem_min_multiplier = 0.33
@@ -92,7 +93,7 @@ notes = "Changed snake to be all single color and using depth 2 " # Add notes he
 
 
 # The code is creating instances of three different classes: `DQNAgent`, `snakeGame`,, `Archiver` and 'Logger'.
-render = renderer.Renderer(renderText, renderVisual, WIDTH, HEIGHT, renderText_conv, renderText_num, useRGBinput, imageResizeFactor)
+render = renderer.Renderer(renderText, renderVisual, WIDTH, HEIGHT, renderText_conv, renderText_num, useRGBinput, imageResizeFactor, useDifferentColorHead)
 game = snakeGame.snakeGame(WIDTH, HEIGHT, START_LENGTH, NUM_FRUIT, CAN_PORT, 
                            reward_step, reward_fruit, reward_into_self, reward_wall, spawnDistanceFromWall)
 plot = archiver.Archiver(AGGREGATE_STATS_EVERY, EXPERIMENT_NAME, EPISODES)
