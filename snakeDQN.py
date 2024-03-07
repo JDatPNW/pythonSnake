@@ -75,10 +75,15 @@ trackGPU = False # can be used when using a GPU - WARNING very slow! Also does m
 GPU_id = 0 # use the ID of the GPU that is being used
 
 input_dims = [WIDTH, HEIGHT, 1] # for non RGB input
-useRGBinput = False # use screenshot of the game as opposed to the minimal input
-imageResizeFactor = 6 # Factor by which theoriginal RGB image will be shrunk
+useRGBinput = True # use screenshot of the game as opposed to the minimal input
+imageResizeFactor = 5 # Factor by which theoriginal RGB image will be shrunk
 spawnDistanceFromWall = 3 # Distance with which the agent will at least spawn from wall
-stateDepth = 1 # NOTE: make sure to set to 1 if not using!!. How many images should be stacked for the input? To portrait motion (only really meant for RGB, but should also work with minimal input)
+stateDepth = 4 # NOTE: make sure to set to 1 if not using!!. How many images should be stacked for the input? To portrait motion (only really meant for RGB, but should also work with minimal input)
+
+RGBmult = 1
+if useRGBinput:
+    RGBmult = 3
+
 useDifferentColorHead = True
 
 good_mem_size_muliplier = 0.5
@@ -101,8 +106,8 @@ log = logger.Logger()
 
 if useRGBinput:
     input_dims = render.Screenshot_Size
-    if stateDepth > 1:
-        input_dims[:0] = [stateDepth]
+if stateDepth > 1:
+    input_dims[-1] = input_dims[-1] * stateDepth
 
 agent = DQNAgent.DQNAgent(REPLAY_MEMORY_SIZE, MIN_REPLAY_MEMORY_SIZE, MINIBATCH_SIZE, UPDATE_TARGET_EVERY, 
                           DISCOUNT, WIDTH, HEIGHT, ACTION_SPACE_SIZE, TF_VERBOSE, input_dims, useRGBinput,
@@ -153,7 +158,7 @@ def main(episode):
     if useRGBinput:
         current_state = np.array(render.getScreenshot(current_state))
         if stateDepth > 1:
-            deep_state.append(current_state)
+            deep_state.extend(current_state)
     # Reset flag and start iterating until episode ends
     start = time.process_time()
     done = False
@@ -166,7 +171,7 @@ def main(episode):
         randomChoice = "False"
         if np.random.random() > epsilon:
             # Get action from Q table
-            if stateDepth > 1 and len(deep_state) < stateDepth:
+            if stateDepth > 1 and len(deep_state[0][0]) < (RGBmult * stateDepth): # TODO: make pretty
                 action = np.random.randint(0, ACTION_SPACE_SIZE)
                 randomChoice = "True - Depth"
             else:
@@ -190,9 +195,12 @@ def main(episode):
             new_state = np.array(render.getScreenshot(field))
 
         if stateDepth > 1 and step_count > 1:
-            deep_state.append(new_state)
-            if len(deep_state) > stateDepth:
-                deep_state.pop(0)
+            # deep_state.extend(new_state)
+            temp = np.concatenate((np.array(deep_state), new_state), axis=2)
+            deep_state = list(temp)
+            del temp
+            if len(deep_state[0][0]) > RGBmult * stateDepth: # TODO: FIX
+                deep_state = list(np.array(deep_state)[:,:,RGBmult:])# TODO: make this prettier
                 state_ready = True
             new_state = deep_state
 
