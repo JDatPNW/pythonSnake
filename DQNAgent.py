@@ -151,10 +151,8 @@ class DQNAgent:
         """
         if reward > self.good_mem_threshold and self.use_good_mem: # TODO make pretty
             self.replay_memory_good.append(transition)
-            print(f"added to GOOD mem. reward {reward}, threshold {self.good_mem_threshold}")
         else:
             self.replay_memory.append(transition)
-            print(f"added to REGULAR mem. reward {reward}, threshold {self.good_mem_threshold}")
             
     # Trains main network every step during episode
     def train(self, terminal_state, step):
@@ -172,22 +170,17 @@ class DQNAgent:
 
         # Start training only if certain number of samples is already saved
         if len(self.replay_memory) < self.MIN_REPLAY_MEMORY_SIZE: # TODO: make pretty
-            print("basic reutrn")
             return
         if self.use_good_mem:
             if len(self.replay_memory_good) < int(self.MIN_REPLAY_MEMORY_SIZE*self.good_mem_min_multiplier):
-                print("goodmem reutrn")
                 return
 
         # Get a minibatch of random samples from memory replay table
         if self.use_good_mem:
             minibatch = random.sample(self.replay_memory, int(self.MINIBATCH_SIZE*(1-self.good_mem_split))) # TODO: make pretty
-            print(f"length of monibatch (only REGULAR) with desired size {self.MINIBATCH_SIZE} and good_mem_split {self.good_mem_split} is {len(minibatch)}")
             minibatch += random.sample(self.replay_memory_good, int(self.MINIBATCH_SIZE*self.good_mem_split)) # TODO: make pretty
-            print(f"length of monibatch (REGULAR + GOOD) with desired size {self.MINIBATCH_SIZE} and good_mem_split {self.good_mem_split} is {len(minibatch)}")
         else:
             minibatch = random.sample(self.replay_memory, int(self.MINIBATCH_SIZE)) # TODO: make pretty
-            print(f"length of monibatch (only REGULAR) with desired size {self.MINIBATCH_SIZE}")
         
 
         # Get current states from minibatch, then query NN model for Q values        
