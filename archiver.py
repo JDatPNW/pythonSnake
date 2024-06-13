@@ -148,7 +148,6 @@ class Archiver():
         del json_model
 
         for filename in os.listdir("./"): # save code base to replicate further if needed
-            print(filename)
             if filename.endswith(".py"):
                 shutil.copyfile(filename, self.experimentRoot + "/code/" + filename)
         
