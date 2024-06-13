@@ -48,9 +48,10 @@ UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
 AGGREGATE_STATS_EVERY = 100  # episodes used for averaging for plotting
 LOG_EVERY_STEP = True # Log into console every step?
 TF_VERBOSE = 0 # TF print outs
-EXPERIMENT_NAME = "resize_" # Name used for files and folders for data
+EXPERIMENT_NAME = "resize_NONRGB_deep_1_wall_dist_3_rerun_" # Name used for files and folders for data
 MAX_STEPS = 150 # Steps before game will automatically reset (to keep the game of going on forever once the agent becomes very good at playing)
 
+noNegRewards = False
 reward_fruit = 25 # reward for picking up a fruit
 reward_into_self = 0 # reward for trying to run into oneself (180 turn)
 reward_step = 0 # reward given at every step
@@ -75,8 +76,8 @@ trackGPU = False # can be used when using a GPU - WARNING very slow! Also does m
 GPU_id = 0 # use the ID of the GPU that is being used
 
 input_dims = [WIDTH, HEIGHT, 1] # for non RGB input
-useRGBinput = True # use screenshot of the game as opposed to the minimal input
-imageResizeFactor = 1 # Factor by which theoriginal RGB image will be shrunk
+useRGBinput = False # use screenshot of the game as opposed to the minimal input
+imageResizeFactor = 9 # Factor by which theoriginal RGB image will be shrunk
 spawnDistanceFromWall = 3 # Distance with which the agent will at least spawn from wall
 stateDepth = 1 # NOTE: make sure to set to 1 if not using!!. How many images should be stacked for the input? To portrait motion (only really meant for RGB, but should also work with minimal input)
 
@@ -89,7 +90,7 @@ useDifferentColorHead = True
 good_mem_size_muliplier = 0.5
 good_mem_min_multiplier = 0.33
 good_mem_split = 0.5
-good_mem_threshold = 0.05 
+good_mem_threshold = 0.005 # was 0.05 for reward_distance_exponent = 10
 use_good_mem = True
 
 mode = "RGB: " + str(useRGBinput) + ", Depth: " + str(stateDepth)
@@ -130,7 +131,7 @@ plot.saveSetup(ACTION_SPACE_SIZE, WIDTH, HEIGHT, START_LENGTH, NUM_FRUIT, CAN_PO
                EPSILON_DECAY, MIN_EPSILON, EPISODES_BEFORE_DECAY, agent.model.get_config(), summary_string, 
                renderVisual, renderText, renderText_conv, renderText_num, sleepText, sleepVisual, RENDER_EVERY, mode, useRGBinput, stateDepth,
                trackGPU, trackCPU_RAM, GPU_id, spawnDistanceFromWall, imageResizeFactor, input_dims,
-               good_mem_size_muliplier, good_mem_min_multiplier, good_mem_split, good_mem_threshold, use_good_mem, reward_distance_exponent, notes)
+               good_mem_size_muliplier, good_mem_min_multiplier, good_mem_split, good_mem_threshold, use_good_mem, reward_distance_exponent, useDifferentColorHead, noNegRewards, notes)
 
 def main(episode):
     """
@@ -225,13 +226,19 @@ def main(episode):
         if not dead and not run_into_self and reward != reward_fruit:
             reward = reward_step
         
-        if reward_distance:
+        if reward_distance and reward != reward_fruit:
             if step_count == 1:
                 pass
             else:
                 # reward += math.pow((game.max_distance - game.closest_distance) / game.max_distance, reward_distance_exponent) # NOTE OLD Function
                 reward += (prev_dist - game.closest_distance) / reward_distance_exponent
             prev_dist = game.closest_distance
+            
+        if noNegRewards:
+            if reward < 0:
+                reward = 0
+        if dead:
+            reward = reward_wall
 
         # Transform new continous state to new discrete state and count reward
         episode_reward += reward
