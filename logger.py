@@ -52,7 +52,7 @@ class Logger():
         print(Style.RESET_ALL)
         print("--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
         print(Fore.YELLOW)
-        print ('| {:<5} | {:<5} | {:<13} | {:<12} | {:<15} | {:<15} | {:<17} | {:<10} | {:<10} | {:<10} | {:<10} | {:<10} |'.format(episode, step, round(epsilon, 10), round(reward, 4), eaten, round(reward_overall, 1), random, action, str(direction), str(head), str(fruit), round(distance, 5)))
+        print ('| {:<5} | {:<5} | {:<13} | {:<12} | {:<15} | {:<15} | {:<17} | {:<10} | {:<10} | {:<10} | {:<10} | {:<10} |'.format(episode, step, round(epsilon, 10), round(reward, 6), eaten, round(reward_overall, 2), random, action, str(direction), str(head), str(fruit), round(distance, 5)))
         print(Style.RESET_ALL)
         print("--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
 
