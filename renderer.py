@@ -3,12 +3,14 @@ import time
 import copy
 import math
 import os
+from PIL import Image 
+import numpy as np
 
 # The `Renderer` class is responsible for rendering the game field either as text or as a visual
 # display using the Pygame library.
 class Renderer:
   
-    def __init__(self, text, visual, gameLogicWidth, gameLogicHeight, numMode, convMode, rgb, downsample, useDifferentColorHead):
+    def __init__(self, text, visual, gameLogicWidth, gameLogicHeight, numMode, convMode, rgb, downsample, useDifferentColorHead, useBW):
         """
         The above function is the initialization function for a Snake game, setting up various variables and
         initializing the Pygame library.
@@ -36,6 +38,14 @@ class Renderer:
         self.GREY = (111, 111, 111)
         self.RED = (255, 0, 0)
         self.YELLOW = (255, 255, 0)
+        self.useBW = useBW
+        if self.useBW:
+            self.BLACK = (0, 0, 0)
+            self.WHITE = (255, 255, 255)
+            self.GREEN = (0, 0, 0)
+            self.GREY = (0, 0, 0)
+            self.RED = (0, 0, 0)
+            self.YELLOW = (0, 0, 0)
         self.MARGIN = 2
         self.gameLogicWidth = gameLogicWidth 
         self.gameLogicHeight = gameLogicHeight 
@@ -193,4 +203,9 @@ class Renderer:
 
         screenshot = pygame.surfarray.pixels3d(self.screen)
         screenshot = screenshot[::self.downsample,::self.downsample,::-1] 
+        if self.useBW:
+            thresh = 200
+            fn = lambda x : 255 if x > thresh else 0
+            screenshot = np.asarray(Image.fromarray(screenshot).convert('L').point(fn, mode='1')).astype(np.uint8)
+            screenshot = np.expand_dims(screenshot, axis=-1)
         return screenshot
