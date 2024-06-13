@@ -48,7 +48,7 @@ UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
 AGGREGATE_STATS_EVERY = 100  # episodes used for averaging for plotting
 LOG_EVERY_STEP = True # Log into console every step?
 TF_VERBOSE = 0 # TF print outs
-EXPERIMENT_NAME = "resize_NONRGB_deep_1_wall_dist_3_rerun_" # Name used for files and folders for data
+EXPERIMENT_NAME = "resize_BW_deep_4_wall_dist_4_fixed_" # Name used for files and folders for data
 MAX_STEPS = 150 # Steps before game will automatically reset (to keep the game of going on forever once the agent becomes very good at playing)
 
 noNegRewards = False
@@ -76,14 +76,17 @@ trackGPU = False # can be used when using a GPU - WARNING very slow! Also does m
 GPU_id = 0 # use the ID of the GPU that is being used
 
 input_dims = [WIDTH, HEIGHT, 1] # for non RGB input
-useRGBinput = False # use screenshot of the game as opposed to the minimal input
+useRGBinput = True # use screenshot of the game as opposed to the minimal input
+useBW = True # if input should only be greyscale, this might break visual rendering
 imageResizeFactor = 9 # Factor by which theoriginal RGB image will be shrunk
-spawnDistanceFromWall = 3 # Distance with which the agent will at least spawn from wall
-stateDepth = 1 # NOTE: make sure to set to 1 if not using!!. How many images should be stacked for the input? To portrait motion (only really meant for RGB, but should also work with minimal input)
+spawnDistanceFromWall = 4 # Distance with which the agent will at least spawn from wall
+stateDepth = 4 # NOTE: make sure to set to 1 if not using!!. How many images should be stacked for the input? To portrait motion (only really meant for RGB, but should also work with minimal input)
 
 RGBmult = 1
 if useRGBinput:
     RGBmult = 3
+    if useBW:
+        RGBmult = 1
 
 useDifferentColorHead = True
 
@@ -99,7 +102,7 @@ notes = "Changed snake to be all single color and using depth 2 " # Add notes he
 
 
 # The code is creating instances of three different classes: `DQNAgent`, `snakeGame`,, `Archiver` and 'Logger'.
-render = renderer.Renderer(renderText, renderVisual, WIDTH, HEIGHT, renderText_conv, renderText_num, useRGBinput, imageResizeFactor, useDifferentColorHead)
+render = renderer.Renderer(renderText, renderVisual, WIDTH, HEIGHT, renderText_conv, renderText_num, useRGBinput, imageResizeFactor, useDifferentColorHead, useBW)
 game = snakeGame.snakeGame(WIDTH, HEIGHT, START_LENGTH, NUM_FRUIT, CAN_PORT, 
                            reward_step, reward_fruit, reward_into_self, reward_wall, spawnDistanceFromWall)
 plot = archiver.Archiver(AGGREGATE_STATS_EVERY, EXPERIMENT_NAME, EPISODES)
@@ -107,9 +110,10 @@ log = logger.Logger()
 
 if useRGBinput:
     input_dims = render.Screenshot_Size
+    if useBW:
+        input_dims[-1] = 1
 if stateDepth > 1:
     input_dims[-1] = input_dims[-1] * stateDepth
-
 agent = DQNAgent.DQNAgent(REPLAY_MEMORY_SIZE, MIN_REPLAY_MEMORY_SIZE, MINIBATCH_SIZE, UPDATE_TARGET_EVERY, 
                           DISCOUNT, WIDTH, HEIGHT, ACTION_SPACE_SIZE, TF_VERBOSE, input_dims, useRGBinput,
                           good_mem_size_muliplier, good_mem_min_multiplier, good_mem_split, good_mem_threshold, use_good_mem)
@@ -163,7 +167,6 @@ def main(episode):
     # Reset flag and start iterating until episode ends
     start = time.process_time()
     done = False
-    
     while not done:
 
         global epsilon, EPSILON_DECAY, MIN_EPSILON
