@@ -131,3 +131,4 @@ dmypy.json
 ./plots/
 /plots/
 /Experiments/
+**/
